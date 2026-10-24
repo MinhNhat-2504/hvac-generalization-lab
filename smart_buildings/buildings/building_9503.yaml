@@ -1,0 +1,25 @@
+name: building_9503
+seed: 9503
+floor_plan:
+  width: 451
+  height: 405
+  num_floors: 3
+  min_room_size: 48
+  max_room_size: 63
+  building_shape: composite
+  shape_ratio: 0.3238416004218947
+  composite_coverage: 0.764972126517948
+  composite_style: architectural
+ahu:
+  num_ahus: 5
+simulation:
+  start_timestamp: 2023-07-10 06:00
+  num_days_in_episode: 30
+  occupants_per_zone: 2
+materials:
+  exterior_cv_conductivity: 0.2193
+  exterior_cv_density: 410.14
+  interior_mass_cv_density: 26.2389
+  interior_wall_cv_conductivity: 0.4594
+  interior_wall_cv_density: 435.5333
+  exterior_cv_heat_capacity: 976.2062
