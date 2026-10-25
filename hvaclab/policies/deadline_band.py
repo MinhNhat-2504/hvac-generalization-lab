@@ -143,9 +143,39 @@ class DeadlineBandPolicy(PIDWaterResetPolicy):
         lead_hours: float = 3.0,
         comfort_margin_k: float = 0.0,
         reheat_full_k: float | None = None,
+        use_sensor_band: bool | None = None,
+        use_worst_zone: bool | None = None,
         **kwargs,
     ) -> None:
         super().__init__(building_meta_data, action_spec, **kwargs)
+
+        # `pid_plus`'s docstring describes reading each zone's band from its
+        # own setpoint sensors rather than rebuilding it from the hour, and
+        # argues for it: "The reward measures deviation from those sensors, so
+        # where a reconstructed band disagrees with them the controller either
+        # conditions a zone the reward already considers comfortable, which is
+        # cost for no benefit, or neglects one it does not."
+        #
+        # But `PIDWorstZonePolicy.USE_SENSOR_BAND` is False and no subclass
+        # turns it on, so the shipped `pid_water` never does this. The
+        # refinement is described and then left off, which makes it worth
+        # measuring rather than assuming either way.
+        if use_sensor_band is not None:
+            self.USE_SENSOR_BAND = bool(use_sensor_band)
+
+        # The other refinement the chain describes and then switches off.
+        # `PIDWorstZonePolicy` drives the air-handler loop from its worst zone
+        # rather than the mean, on the argument that the comfort penalty is
+        # unbounded in the worst zone, so an averaged loop can read as
+        # perfectly in band while one zone under it is the whole episode's
+        # loss. `PIDEconomizerPolicy` then sets USE_WORST_ZONE = False and
+        # every later class inherits that, so `pid_water` uses the mean.
+        #
+        # This is structurally different from a gain: it changes which zone
+        # the single shared supply-air temperature is chosen for, which is the
+        # one decision the plant cannot make per zone.
+        if use_worst_zone is not None:
+            self.USE_WORST_ZONE = bool(use_worst_zone)
 
         self.setback_k = float(setback_k)
         self.setup_k = float(setup_k)

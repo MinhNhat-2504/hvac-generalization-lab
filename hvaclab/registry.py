@@ -211,6 +211,37 @@ _Z: dict[str, tuple[str, dict[str, Any]]] = {
 }
 _W.update(_Z)
 
+# ---------------------------------------------------------------------------
+# Comfort levers. Comfort is 70-75% of what is left after the fan clamp, so
+# the remaining score is here and not in energy.
+#
+# The refuted damper gate is what motivates the first two. It failed because
+# shutting a damper leaves a zone's 10 W/m2 of internal gain with no way out,
+# so the zone drifts past where the supply air would have held it. If more
+# mixing is what helps, then dampers should open SOONER, not later -- the
+# opposite of w_damper4/w_damper8, which were drawn up before that was known.
+_BEST: dict[str, Any] = {**FLAT, "heating_pressure": -1.0,
+                         "cooling_pressure_gain": 1.0, "reheat_full_k": 0.5}
+_C: dict[str, tuple[str, dict[str, Any]]] = {
+    "c_damper1": ("fan", {**_BEST, "zone_damper_full_k": 1.0}),
+    "c_damper05": ("fan", {**_BEST, "zone_damper_full_k": 0.5}),
+    # A stiffer loop reaches full supply-air authority sooner. pid's default
+    # kp = 0.5 saturates at 2 K, which is a long way out when a kelvin of
+    # occupied deviation costs 19 kWh.
+    "c_kp10": ("fan", {**_BEST, "kp": 1.0}),
+    # Read each zone's band from its own setpoint sensors, so the controller
+    # and the scorer agree on where the edge is. Described in pid_plus's
+    # docstring and then left switched off.
+    "c_sensorband": ("fan", {**_BEST, "use_sensor_band": True}),
+    # The one shipped refinement never measured in this chain, and the only
+    # candidate left that is structural rather than a gain: which zone the
+    # single shared supply-air temperature is chosen for.
+    "c_worst": ("fan", {**_BEST, "use_worst_zone": True}),
+    "c_worst_band": ("fan", {**_BEST, "use_worst_zone": True,
+                             "use_sensor_band": True}),
+}
+_W.update(_C)
+
 _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     **_SETBACK_ABLATION,
 
