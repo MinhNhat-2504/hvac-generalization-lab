@@ -61,6 +61,58 @@ _SETBACK_ABLATION: dict[str, tuple[str, dict[str, Any]]] = {
 # ---------------------------------------------------------------------------
 FLAT: dict[str, Any] = {"setback_k": 0.0, "setup_k": 0.0}
 
+# ---------------------------------------------------------------------------
+# MEASURED: the fan clamp is the single biggest win so far.
+# ---------------------------------------------------------------------------
+# Same three scenarios, mean of the three:
+#
+#   v_fan       0.04967   flat band + heating fan at its floor + cooling x0.6
+#   v_fan_heat  0.05226   heating clamp only
+#   v_fan_hw    0.05362   v_fan plus a hot-water floor
+#   v_fan_urg   0.07357   v_fan, economy suspended while a zone is out of band
+#   v_fan_m05   0.07593   v_fan plus a 0.5 K margin inside the band
+#   v_fan_ctrl  0.12321   identical to band_flat, to the digit
+#   pid_water   0.13478
+#   v_m05       0.23605   margin alone
+#
+# v_fan is 63% below pid_water, and on fairbanks_1 it is 0.0797 against
+# band_flat's 0.264 -- 70% better, and 47% better than fixed_setpoint's 0.149.
+#
+# It improves ALL THREE terms at once: comfort 0.0347 -> 0.0237, energy
+# 0.0411 -> 0.0126, carbon 0.0474 -> 0.0134. Comfort improving alongside the
+# energy saving is the tell that this is not a trade. Less static pressure is
+# less airflow, and with recirculation capped at 0.70 that is also less
+# ambient air dragged in and heated from -42 C -- which in Fairbanks is most
+# of the load. Cutting the flow cuts the load, so the coils keep up where
+# before they could not.
+#
+# Two guesses refuted at the same time, both worth keeping as results:
+#
+#  * `heating_water_floor` makes things worse (carbon 0.0134 -> 0.0162). Once
+#    the flow is down, pid_water's own demand reset is already hot enough, and
+#    forcing it hotter just burns gas.
+#  * `urgent_deviation_k` makes things worse, which is counterintuitive --
+#    comfort is worth 35x energy, so running the fan hard while a zone is out
+#    of band ought to pay. It does not, because the fan is what *causes* the
+#    load here. Spending the expensive fuel to deliver heat drags in more cold
+#    air than the extra flow delivers.
+#  * `comfort_margin_k` is clearly harmful (0.236 against 0.123 for a flat
+#    band). Narrowing a 3 K band to 2 K leaves pid, whose loop saturates at
+#    1/kp = 2 K, oscillating across the real edge: comfort gets WORSE, not
+#    just more expensive.
+#
+# `_W` tunes around v_fan, one lever at a time.
+_W: dict[str, tuple[str, dict[str, Any]]] = {}
+_FAN: dict[str, Any] = {**FLAT, "heating_pressure": -1.0,
+                        "cooling_pressure_gain": 0.6}
+for _gain in (0.3, 0.45, 0.8, 1.0):
+    _W[f"w_cool{int(_gain * 100):03d}"] = (
+        "fan", {**_FAN, "cooling_pressure_gain": _gain})
+_W["w_reheat05"] = ("fan", {**_FAN, "reheat_full_k": 0.5})
+_W["w_reheat10"] = ("fan", {**_FAN, "reheat_full_k": 1.0})
+_W["w_pump00"] = ("fan", {**_FAN, "pump_pressure": 0.0})
+_W["w_pump-05"] = ("fan", {**_FAN, "pump_pressure": -0.5})
+
 _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     **_SETBACK_ABLATION,
 
@@ -121,13 +173,7 @@ _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     "v_pump0": ("fan", {**FLAT, "heating_pressure": None,
                         "cooling_pressure_gain": 1.0,
                         "pump_pressure": 0.0}),
-    # Everything, as the current best guess.
-    "v_all": ("fan", {**FLAT, "reheat_full_k": 0.5,
-                      "heating_pressure": -1.0,
-                      "cooling_pressure_gain": 0.6,
-                      "heating_water_floor": 0.5,
-                      "pump_pressure": 0.0,
-                      "comfort_margin_k": 0.5}),
+    **_W,
 }
 
 
