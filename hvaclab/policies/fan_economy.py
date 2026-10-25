@@ -117,6 +117,12 @@ class FanEconomyPolicy(DeadlineBandPolicy):
             with a zone genuinely out of band, the fan is worth running at
             whatever the inherited law asks for; outside it, or once the
             building is in band, it is not.
+        pump_pressure: Upper bound on the hot-water pump's differential
+            pressure. The inherited chain pins it at +1, the full 20 units,
+            whenever any air handler is active -- heating or not. Pump power
+            goes with pressure, the pump is electricity, and the loop only has
+            to move enough water to feed the valves that are open. ``None``
+            leaves it alone.
     """
 
     def __init__(
@@ -127,6 +133,7 @@ class FanEconomyPolicy(DeadlineBandPolicy):
         cooling_pressure_gain: float = 0.6,
         heating_water_floor: float | None = None,
         urgent_deviation_k: float | None = None,
+        pump_pressure: float | None = None,
         **kwargs,
     ) -> None:
         super().__init__(building_meta_data, action_spec, **kwargs)
@@ -139,6 +146,9 @@ class FanEconomyPolicy(DeadlineBandPolicy):
         )
         self.urgent_deviation_k = (
             None if urgent_deviation_k is None else float(urgent_deviation_k)
+        )
+        self.pump_pressure = (
+            None if pump_pressure is None else float(pump_pressure)
         )
 
     def _is_urgent(self, obs: np.ndarray) -> bool:
@@ -228,6 +238,24 @@ class FanEconomyPolicy(DeadlineBandPolicy):
             continuous[self.water_temp_idx] = np.float32(max(
                 float(continuous[self.water_temp_idx]),
                 self.heating_water_floor,
+            ))
+
+        # The pump is electricity too, and the inherited chain pins its
+        # differential pressure at +1 -- the full 20 units -- whenever any air
+        # handler is active, heating or not. Pump power goes with pressure, and
+        # the loop only has to move enough water to feed the valves that are
+        # actually open, so the maximum is a default rather than a requirement.
+        #
+        # Only lowered, never raised: if the inherited law has already asked
+        # for less, it knows something this does not.
+        if (
+            self.pump_pressure is not None
+            and self.water_pressure_idx is not None
+            and discrete[self.water_discrete_idx]
+        ):
+            continuous[self.water_pressure_idx] = np.float32(min(
+                float(continuous[self.water_pressure_idx]),
+                self.pump_pressure,
             ))
 
         return action

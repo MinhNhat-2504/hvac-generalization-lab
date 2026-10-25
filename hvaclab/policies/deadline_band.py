@@ -121,6 +121,17 @@ class DeadlineBandPolicy(PIDWaterResetPolicy):
             into slack. It costs a little energy to hold and, at 35:1 against
             comfort, that is a trade worth making -- 1 K of occupied deviation
             costs 0.12 per step against 0.0064 per kWh.
+        reheat_full_k: Shortfall in K at which the reheat valve is fully open,
+            shadowing ``PIDProportionalReheatPolicy``'s 2.0 K default.
+            ``None`` keeps it.
+
+            This is one of the refinements that make ``pid_water`` *worse* than
+            plain ``pid`` in the cold. With the band held flat on
+            ``fairbanks_1``, ``pid``-based ``fixed_setpoint`` scores 0.149
+            against ``pid_water``-based 0.264 -- 77% worse -- while on
+            ``phoenix_4`` the same refinements are 2.5x *better*. Throttling
+            the valve protects a mild climate from overshoot and starves a cold
+            one, where the valve is the only heat source in the building.
     """
 
     def __init__(
@@ -131,6 +142,7 @@ class DeadlineBandPolicy(PIDWaterResetPolicy):
         setup_k: float = 3.0,
         lead_hours: float = 3.0,
         comfort_margin_k: float = 0.0,
+        reheat_full_k: float | None = None,
         **kwargs,
     ) -> None:
         super().__init__(building_meta_data, action_spec, **kwargs)
@@ -139,6 +151,19 @@ class DeadlineBandPolicy(PIDWaterResetPolicy):
         self.setup_k = float(setup_k)
         self.lead_steps = max(1.0, float(lead_hours) * STEPS_PER_HOUR)
         self.comfort_margin_k = float(comfort_margin_k)
+
+        # Shadows PIDProportionalReheatPolicy's class attribute. Its default is
+        # 2.0 K, meaning a zone has to be 2 K below its heating setpoint before
+        # the reheat valve is fully open.
+        #
+        # That throttling is the right instinct in a mild climate -- it stops a
+        # zone 0.3 K cold being driven straight through its band -- but it
+        # under-delivers in deep cold, where the valve is the ONLY heat source
+        # and the air arriving at the coil is already 20 K below the zone. A
+        # smaller value saturates the valve sooner, which is what the cold
+        # wants.
+        if reheat_full_k is not None:
+            self.REHEAT_FULL_K = float(reheat_full_k)
 
         names = list(self.field_names)
         # `comfort_mode_now` is the environment's own

@@ -102,6 +102,32 @@ _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
                           "heating_pressure": -1.0,
                           "cooling_pressure_gain": 0.6,
                           "heating_water_floor": 0.5}),
+
+    # Open the reheat valve sooner. With the band flat on fairbanks_1,
+    # pid-based fixed_setpoint scores 0.149 against pid_water-based 0.264,
+    # while on phoenix_4 the same refinements are 2.5x better -- so a
+    # refinement tuned to protect a mild climate from overshoot is starving a
+    # cold one, where the valve is the only heat source in the building.
+    "v_reheat05": ("band", {**FLAT, "reheat_full_k": 0.5}),
+    "v_reheat10": ("band", {**FLAT, "reheat_full_k": 1.0}),
+    # Everything that should help the cold, together.
+    "v_cold": ("fan", {**FLAT, "reheat_full_k": 0.5,
+                       "heating_pressure": -1.0,
+                       "cooling_pressure_gain": 0.6,
+                       "heating_water_floor": 0.5}),
+
+    # The pump is electricity too, and the inherited chain pins its
+    # differential pressure at the full 20 units whenever any handler runs.
+    "v_pump0": ("fan", {**FLAT, "heating_pressure": None,
+                        "cooling_pressure_gain": 1.0,
+                        "pump_pressure": 0.0}),
+    # Everything, as the current best guess.
+    "v_all": ("fan", {**FLAT, "reheat_full_k": 0.5,
+                      "heating_pressure": -1.0,
+                      "cooling_pressure_gain": 0.6,
+                      "heating_water_floor": 0.5,
+                      "pump_pressure": 0.0,
+                      "comfort_margin_k": 0.5}),
 }
 
 
