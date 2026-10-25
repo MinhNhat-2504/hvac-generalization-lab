@@ -36,6 +36,7 @@ FINAL = Path(__file__).resolve().parent / "_final_policy.py"
 OUT_DIR = REPO / "experiments" / "submission"
 OUT_POLICY = OUT_DIR / "submission_policy.py"
 OUT_NOTEBOOK = OUT_DIR / "submission.ipynb"
+OUT_BASELINE = OUT_DIR / "submission_baseline.ipynb"
 
 # The two imports the concatenation makes redundant. Matched exactly so that an
 # upstream edit which changes them fails loudly here rather than silently
@@ -162,13 +163,69 @@ smart_buildings_inference_server.SmartBuildingsInferenceServer(SubmissionPolicy)
 '''
 
 
+BASELINE_CELL = '''# NeurIPS 2026 Smart Buildings Competition -- CALIBRATION SUBMISSION
+#
+# This is the shipped `pid_water` baseline, unmodified. It is submitted not to
+# score well but to read the scale of the leaderboard.
+#
+# We measure `pid_water` at 0.05496 locally over the 30 published training
+# scenarios, and our own controller at 0.03682, a 33% improvement. The public
+# leaderboard sits near 0.005, which is six to ten times lower than anything we
+# measure on any of our three local sets. That gap could mean the held-out
+# scenarios are far easier, that the metric is normalised differently there, or
+# that something about the evaluation differs from `evaluate.py`.
+#
+# Submitting a baseline whose local value is known exactly turns the
+# leaderboard into a ruler: whatever `pid_water` scores here is the conversion
+# factor between the two scales, and the gap between this entry and ours is the
+# improvement that actually transfers.
+
+import sys
+
+sys.path.append(
+    "/kaggle/input/competitions/neurips-2026-smart-buildings/kaggle_evaluation"
+)
+
+from kaggle_evaluation import smart_buildings_inference_server
+
+COMPETITION_DATA_FOLDER = "/kaggle/input/competitions/neurips-2026-smart-buildings/"
+
+
+{policy_source}
+
+
+class SubmissionPolicy(smart_buildings_inference_server.Policy):
+    """The shipped `pid_water`, held inside the server's own Policy.
+
+    Composition rather than multiple inheritance: PIDPolicy, the root of the
+    starter kit chain, never calls super().__init__(), so inheriting from both
+    would leave the server's own constructor unrun.
+    """
+
+    def __init__(self, building_meta_data, action_spec):
+        super().__init__(building_meta_data, action_spec)
+        self._policy = PIDWaterResetPolicy(building_meta_data, action_spec)
+
+    def get_action(self, obs):
+        return self._policy.get_action(obs)
+
+
+smart_buildings_inference_server.SmartBuildingsInferenceServer(SubmissionPolicy).run(
+    competition_data_folder=COMPETITION_DATA_FOLDER,
+)
+'''
+
+
 def build_notebook(policy_source: str, title: str, results: str,
-                   cooling_note: str) -> dict:
+                   cooling_note: str, template: str = NOTEBOOK_CELL) -> dict:
     """One-cell notebook, matching the shape of the official template."""
-    source = NOTEBOOK_CELL.format(
-        policy_source=policy_source, title=title, results=results,
-        cooling_note=cooling_note,
-    )
+    if template is BASELINE_CELL:
+        source = template.format(policy_source=policy_source)
+    else:
+        source = template.format(
+            policy_source=policy_source, title=title, results=results,
+            cooling_note=cooling_note,
+        )
     return {
         "cells": [{
             "cell_type": "code",
@@ -250,6 +307,13 @@ def main() -> None:
     notebook = build_notebook(source, args.title, args.results, args.cooling_note)
     OUT_NOTEBOOK.write_text(json.dumps(notebook, indent=1))
     print(f"wrote {OUT_NOTEBOOK.relative_to(REPO)}")
+
+    # The calibration entry reuses the same assembled sources, so the only
+    # difference between the two submissions is which class the server is
+    # handed. Anything else would make the comparison worth less.
+    baseline = build_notebook(source, "", "", "", template=BASELINE_CELL)
+    OUT_BASELINE.write_text(json.dumps(baseline, indent=1))
+    print(f"wrote {OUT_BASELINE.relative_to(REPO)}  (pid_water calibration)")
 
     if args.verify:
         print("\nverifying against the local harness...")
