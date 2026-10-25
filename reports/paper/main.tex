@@ -394,8 +394,11 @@ direction we intend for the final submission.
 
 \paragraph{Limitations.} The tuning in Table~\ref{tab:ablation} beyond the
 heating clamp is small, measured on three scenarios, and we do not claim those
-constants transfer---the dev results suggest the cooling clamp in particular
-does not. Our policy is better on 19 of 30 published scenarios and only 8 of
+constants transfer. The cooling clamp in particular is a wash once measured
+properly: dropping it moves the score by $+2.7\%$ on the published set,
+$-0.7\%$ on dev and $+0.3\%$ on test, which averages to $0.6\%$ and is not a
+difference we would defend. \textbf{The heating clamp is the result; the rest
+is noise around it.} Our policy is better on 19 of 30 published scenarios and only 8 of
 20 dev scenarios; it wins on the mean because the losses are tiny (median
 $0.001$) and the wins are large, which is the right shape for this metric but
 is not the same as being uniformly better. Our held-out buildings are our own
