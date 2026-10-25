@@ -32,22 +32,26 @@
 The Smart Buildings Challenge asks whether a single HVAC control policy can
 transfer to buildings and climates it has never seen, and poses as an open
 question whether domain-specific models or generic foundation models will
-generalize best. We report a result on the domain-specific side. All four
-reference controllers shipped with the challenge price fan static pressure as
-a cost to be paid in proportion to demand. In this plant that is the wrong
-sign: the simulator caps recirculation at 70\%, so three tenths of every cubic
-metre the fan moves is ambient air that must then be conditioned from the
-outdoor temperature. Raising static pressure to deliver heat therefore
-\emph{increases} the heating load it was raised to meet. Correcting this single
-term---clamping static pressure to its floor whenever an air handler is
-heating---reduces the leaderboard metric from $0.05496$ to $0.03682$ over the
-30 published training scenarios, a $33.0\%$ reduction, and improves comfort,
-energy cost and carbon \emph{simultaneously} rather than trading between them.
-On the worst scenario the metric falls $66\%$. The controller has no learned
-parameters, runs in pure NumPy, and is a 40-line change to the strongest
-shipped baseline. We also report five refuted hypotheses, including our own
-initial one, and a methodological finding: the baseline return table shipped
-with the starter kit predates a simulator fix and no longer reproduces.
+generalize best. We report a result on the domain-specific side, and a caution
+about how it should be measured. All four reference controllers shipped with
+the challenge price fan static pressure as a cost to be paid in proportion to
+demand. In this plant that is the wrong sign: the simulator caps recirculation
+at 70\%, so three tenths of every cubic metre the fan moves is ambient air that
+must then be conditioned from the outdoor temperature. Raising static pressure
+to deliver heat therefore \emph{increases} the heating load it was raised to
+meet. Clamping static pressure to its floor whenever an air handler is heating
+reduces the leaderboard metric from $0.05496$ to $0.03682$ over the 30
+published training scenarios---a $33.0\%$ reduction, improving comfort, energy
+and carbon simultaneously, with the worst scenario falling $66\%$. On held-out
+buildings we generated ourselves the same controller gains $5.7\%$ and
+$13.4\%$. We argue the gap is the result, not a failure of it: the published
+set contains catastrophic baseline failures and the held-out sets do not, so
+the published 30 overstate what any repair of those failures is worth. The
+controller has no learned parameters, runs in pure NumPy, and is a 40-line
+change to the strongest shipped baseline. We also report five refuted
+hypotheses, including our own initial one, and a methodological finding: the
+baseline return table shipped with the starter kit predates a simulator fix
+and no longer reproduces.
 \end{abstract}
 
 \section{Introduction}
@@ -244,17 +248,59 @@ pressure law carries the result.}
 \label{tab:ablation}
 \end{table}
 
-\paragraph{Held-out buildings and climates.} Because the published 30 scenarios
-are a training set, we built two replacements from material they never use. The
-generator is procedural and ten of the 48 shipped weather strips are unused by
-the published set, with a further station, \texttt{minneapolis}, used by none of
-them. \textbf{dev} is four newly generated buildings crossed with the five
-unused strips at seen stations; \textbf{test} is four further buildings crossed
-with \texttt{minneapolis}, so neither the building nor the climate has been
-seen. All eight buildings fall inside the $28$--$85$ zone and $3$--$9$
-air-handler range the organizers state for the evaluation set. Results on these
-sets are reported in the camera-ready; the method has no fitted parameters to
-carry over, which is the reason to expect them to hold.
+\subsection{Held-out buildings and climates}
+
+Because the published 30 scenarios are a training set, we built two
+replacements from material they never use. The generator is procedural, ten of
+the 48 shipped weather strips are unused by the published set, and a further
+station, \texttt{minneapolis}, is used by none of them. \textbf{dev} is four
+newly generated buildings crossed with five unused strips at seen stations;
+\textbf{test} is four further buildings crossed with \texttt{minneapolis}, so
+neither the building nor the climate has been seen. All eight fall inside the
+$28$--$85$ zone and $3$--$9$ air-handler range the organizers state for the
+evaluation set.
+
+\begin{table}[h]
+\centering
+\caption{The same controller on three sets. The gain is positive everywhere
+and much smaller off the published scenarios.}
+\begin{tabular}{lccc}
+\toprule
+ & \texttt{pid\_water} & ours & change \\
+\midrule
+published (30 scenarios)      & $0.05496$ & $0.03682$ & $-33.0\%$ \\
+dev (20, unseen buildings)    & $0.04630$ & $0.04367$ & $-5.7\%$ \\
+test (8, unseen also climate) & $0.11253$ & $0.09748$ & $-13.4\%$ \\
+\bottomrule
+\end{tabular}
+\label{tab:holdout}
+\end{table}
+
+\textbf{We think the gap is the finding, not a flaw in it.} The worst-case
+column explains it: \texttt{pid\_water}'s worst published scenario scores
+$0.214$, its worst dev scenario $0.089$. The published 30 contain catastrophic
+baseline failures---\texttt{fairbanks\_1}, \texttt{phoenix\_4},
+\texttt{phoenix\_5}, \texttt{singapore\_4}---and our change is largely
+repairing those. Where the baseline does not fail badly there is less to win.
+A method evaluated only on the published set would therefore report roughly
+five times the improvement it should expect on fresh buildings from the same
+generator.
+
+The decomposition shifts too. On dev, energy and carbon still fall sharply
+($0.0073\!\to\!0.0053$ and $0.0071\!\to\!0.0052$) but comfort rises slightly
+($0.0318\!\to\!0.0332$), where on the published set all three improved.
+\texttt{phoenix} is the only station that regresses, at $+2.9\%$, which points
+at the cooling clamp rather than the heating clamp as the term trading comfort
+away---consistent with the mechanism, since in cooling the air is the delivery
+path and not only the load.
+
+We note one way our holdout may differ from the organizers'. The shipped floor
+generator's default footprint is $400$--$700 \times 300$--$500$\,ft, which
+produces buildings far outside the stated evaluation range---one seed gave 162
+zones and 17 air handlers. We therefore drew footprints from the shipped six's
+own range and rescaled until the realised zone count landed in $28$--$85$. If
+the organizers' held-out buildings were drawn differently, our estimate of the
+transfer gap moves with them.
 
 \section{What did not work}
 \label{sec:negative}
@@ -318,11 +364,19 @@ simulator that no longer exists.
 \section{Discussion}
 
 On the organizers' open question, this is evidence that domain structure is
-worth a great deal here, and cheaply. The result is a 40-line change,
-dimensionless, with no fitted constants and nothing to transfer, and it holds
-across both temperature extremes because it acts through a constraint---the
-$70\%$ recirculation cap---that is a property of the plant rather than of any
-building.
+worth a good deal here, and cheaply. The result is a 40-line change,
+dimensionless, with no fitted constants and nothing to transfer, and its sign
+is the same on every set we measured because it acts through a
+constraint---the $70\%$ recirculation cap---that is a property of the plant
+rather than of any building.
+
+Its \emph{magnitude}, though, is a property of the evaluation set, and that is
+the part we would most want other entrants to take from this. The difference
+between $33\%$ and $5.7\%$ is not noise and not overfitting in the usual
+sense---nothing was tuned on the published scenarios that is not also present
+on dev---but a difference in how often the baseline's failure mode occurs. Any
+entry that reports only published-set numbers is reporting the frequency of
+those failures as much as the quality of its method.
 
 We would not read it as evidence against learned policies in general. We would
 read it as a statement about what a learned policy would have to discover: not a
@@ -336,10 +390,14 @@ direction we intend for the final submission.
 
 \paragraph{Limitations.} The tuning in Table~\ref{tab:ablation} beyond the
 heating clamp is small, measured on three scenarios, and we do not claim those
-constants transfer. The cooling clamp in particular is a climate trade: at a
-gain of $0.3$ it helps \texttt{phoenix} and costs \texttt{singapore}. We have
-not tested on the organizers' held-out set, and the public leaderboard scores
-only a rotating subset.
+constants transfer---the dev results suggest the cooling clamp in particular
+does not. Our policy is better on 19 of 30 published scenarios and only 8 of
+20 dev scenarios; it wins on the mean because the losses are tiny (median
+$0.001$) and the wins are large, which is the right shape for this metric but
+is not the same as being uniformly better. Our held-out buildings are our own
+construction and may not match the organizers' draw. We have not run against
+the organizers' held-out set, and the public leaderboard scores only a
+rotating subset of it.
 
 \paragraph{Reproducibility.} Code, every sweep in this paper as JSON, and the
 held-out generator are at

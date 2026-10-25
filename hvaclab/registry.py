@@ -150,6 +150,40 @@ _W["w_kp025"] = ("fan", {**_FAN, "kp": 0.25})
 _W["w_combo"] = ("fan", {**_FAN, "reheat_full_k": 0.5,
                          "cooling_pressure_gain": 0.3})
 
+# ---------------------------------------------------------------------------
+# MEASURED on the held-out sets. The headline does not transfer at full size.
+# ---------------------------------------------------------------------------
+#                        pid_water    w_reheat05
+#   shipped 30 scenarios   0.05496      0.03682    -33.0%
+#   dev   (20 scenarios)   0.04630      0.04367     -5.7%
+#   test  ( 8 scenarios)   0.11253      0.09748    -13.4%
+#
+# The gain is real everywhere but much smaller off the published set, and the
+# reason is visible in the worst-case column: pid_water's worst shipped
+# scenario is 0.214, its worst dev scenario 0.089. The published 30 contain
+# catastrophic failures -- fairbanks_1, phoenix_4, phoenix_5, singapore_4 --
+# and this change is mostly repairing those. Where the baseline does not fail
+# badly there is less to win.
+#
+# On dev the decomposition also differs: energy and carbon still fall sharply
+# (0.0073 -> 0.0053, 0.0071 -> 0.0052) but comfort rises slightly (0.0318 ->
+# 0.0332), where on the published set all three improved. Phoenix is the only
+# station that regresses (+2.9%), which points at the cooling clamp rather
+# than the heating clamp as the term that trades comfort away.
+#
+# These test that. dev is the legitimate place to tune; test is not.
+_X: dict[str, tuple[str, dict[str, Any]]] = {
+    # Heating clamp only -- isolates the cooling clamp as the suspect.
+    "x_heatonly": ("fan", {**FLAT, "heating_pressure": -1.0,
+                           "cooling_pressure_gain": 1.0,
+                           "reheat_full_k": 0.5}),
+    # A softer cooling clamp rather than none.
+    "x_cool08": ("fan", {**FLAT, "heating_pressure": -1.0,
+                         "cooling_pressure_gain": 0.8,
+                         "reheat_full_k": 0.5}),
+}
+_W.update(_X)
+
 _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     **_SETBACK_ABLATION,
 
