@@ -53,3 +53,11 @@ smart_buildings/training_scenarios/
 # they are the measurement record; raw per-step traces are not.
 experiments/traces/
 *.npz
+
+# Generated holdout building definitions. The six shipped building_train_*.yaml
+# are tracked; anything else in this directory came out of the floor generator
+# for a holdout split and is reproducible from its seed with
+# `python -m hvaclab.holdout`. Keeping them out means the repo cannot quietly
+# become a place where holdout material is tuned against.
+smart_buildings/buildings/*.yaml
+!smart_buildings/buildings/building_train_*.yaml
