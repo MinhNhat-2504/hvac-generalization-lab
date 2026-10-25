@@ -16,6 +16,7 @@ _OURS: dict[str, tuple[str, str]] = {
     # current design is a response to. See deadline_band's module docstring.
     "occ": ("hvaclab.policies.occupancy_gated", "OccupancyGatedPolicy"),
     "band": ("hvaclab.policies.deadline_band", "DeadlineBandPolicy"),
+    "fan": ("hvaclab.policies.fan_economy", "FanEconomyPolicy"),
 }
 
 # Parameter variants, for ablation. The right setback depth is climate
@@ -39,6 +40,19 @@ _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     # deeper setback than the cold side. The shipped eco band uses 5 K down
     # and only 1 K up; this inverts that asymmetry to test it.
     "band_asym": ("band", {"setback_k": 2.0, "setup_k": 8.0}),
+
+    # Fan-work variants. `fan_ctrl` reproduces pid's own pressure law, so it
+    # isolates the effect of the heating clamp from everything else in the
+    # class; any difference between it and the matching `band_*` entry is a
+    # bug, not a result.
+    "fan_ctrl": ("fan", {"heating_pressure": None,
+                         "cooling_pressure_gain": 1.0}),
+    "fan_heat_floor": ("fan", {"heating_pressure": -1.0,
+                               "cooling_pressure_gain": 1.0}),
+    "fan_both": ("fan", {"heating_pressure": -1.0,
+                         "cooling_pressure_gain": 0.6}),
+    "fan_cool_only": ("fan", {"heating_pressure": None,
+                              "cooling_pressure_gain": 0.6}),
 }
 
 
