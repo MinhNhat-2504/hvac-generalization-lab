@@ -113,6 +113,20 @@ _W["w_reheat10"] = ("fan", {**_FAN, "reheat_full_k": 1.0})
 _W["w_pump00"] = ("fan", {**_FAN, "pump_pressure": 0.0})
 _W["w_pump-05"] = ("fan", {**_FAN, "pump_pressure": -0.5})
 
+# Airflow is the load, not just the bill -- that is the lesson of v_fan. So
+# the other levers that set airflow are worth the same treatment. These pass
+# straight through to PIDPolicy's constructor.
+#
+# zone_damper_full_k is the zone excursion at which a damper is commanded
+# fully open; pid's default is 2.0 K, matched to its own loop saturating at
+# 1/kp = 2 K. Raising it keeps dampers closer to their 10% floor for the same
+# excursion, which is less flow for the same demand.
+for _dk in (4.0, 8.0):
+    _W[f"w_damper{int(_dk)}"] = ("fan", {**_FAN, "zone_damper_full_k": _dk})
+# A gentler loop reaches full supply-air effort later, so it spends less of
+# the episode at saturation.
+_W["w_kp025"] = ("fan", {**_FAN, "kp": 0.25})
+
 _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     **_SETBACK_ABLATION,
 
