@@ -234,6 +234,21 @@ def run_sweep(
         for (b, w) in pairs
     ]
 
+    # One thread per worker, set before any child is spawned.
+    #
+    # The simulator's hot loop is a sparse factorization, and numpy/scipy's
+    # BLAS defaults to one thread per core. With N workers that is N x 16
+    # threads on 16 cores: the first sweep attempt ran at 1.4 s/step against
+    # 0.05 s/step single-threaded, a 27x loss entirely to oversubscription.
+    #
+    # Each scenario is already an independent task, so thread-level
+    # parallelism inside a worker buys nothing and costs cache. Set in the
+    # parent because `spawn` children inherit the environment and import
+    # numpy fresh, which is the only point these variables are read.
+    for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+                "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+        os.environ[var] = "1"
+
     results: list[ScenarioResult] = []
     t0 = time.time()
     ctx = mp.get_context("spawn")
