@@ -62,6 +62,18 @@ _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     "fan_hot_water_max": ("fan", {"heating_pressure": -1.0,
                                   "cooling_pressure_gain": 0.6,
                                   "heating_water_floor": 1.0}),
+    # Economise only while the shortfall is not being charged for. A quiet fan
+    # delivers heat slowly, and slow is cheap only when nobody is paying for
+    # the deviation; inside the scored window with a zone 1 K out, comfort is
+    # worth 19 kWh per step, so the fan is worth whatever it costs.
+    "fan_urgent1": ("fan", {"heating_pressure": -1.0,
+                            "cooling_pressure_gain": 0.6,
+                            "heating_water_floor": 0.5,
+                            "urgent_deviation_k": 1.0}),
+    "fan_urgent0": ("fan", {"heating_pressure": -1.0,
+                            "cooling_pressure_gain": 0.6,
+                            "heating_water_floor": 0.5,
+                            "urgent_deviation_k": 0.0}),
 }
 
 

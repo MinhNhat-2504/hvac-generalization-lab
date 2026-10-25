@@ -105,6 +105,18 @@ class FanEconomyPolicy(DeadlineBandPolicy):
             temperature while any handler is heating, so the loop is hot
             enough to deliver heat at the reduced airflow. ``None`` leaves
             ``pid_water``'s demand reset alone, which is the control.
+        urgent_deviation_k: Suspend the fan economy while the building is
+            being scored AND some zone is this far outside the comfort band.
+            ``None`` applies the economy unconditionally.
+
+            The reason is the 35:1 price ratio. A quiet fan delivers heat
+            slowly, and slow is cheap only while nobody is being charged for
+            the shortfall. Every occupied zone sitting 1 K outside its band
+            costs 0.12 per step, which is 19 kWh of electricity -- 225 kW held
+            continuously, against a 320 kW plant. So inside the scored window,
+            with a zone genuinely out of band, the fan is worth running at
+            whatever the inherited law asks for; outside it, or once the
+            building is in band, it is not.
     """
 
     def __init__(
@@ -114,6 +126,7 @@ class FanEconomyPolicy(DeadlineBandPolicy):
         heating_pressure: float | None = -1.0,
         cooling_pressure_gain: float = 0.6,
         heating_water_floor: float | None = None,
+        urgent_deviation_k: float | None = None,
         **kwargs,
     ) -> None:
         super().__init__(building_meta_data, action_spec, **kwargs)
@@ -124,6 +137,30 @@ class FanEconomyPolicy(DeadlineBandPolicy):
         self.heating_water_floor = (
             None if heating_water_floor is None else float(heating_water_floor)
         )
+        self.urgent_deviation_k = (
+            None if urgent_deviation_k is None else float(urgent_deviation_k)
+        )
+
+    def _is_urgent(self, obs: np.ndarray) -> bool:
+        """Is comfort being scored right now, with a zone genuinely out of band?
+
+        Both halves are required. Outside the scored window a deviation costs
+        nothing, so there is nothing to be urgent about; inside it with every
+        zone in band there is nothing to fix.
+        """
+        if self.urgent_deviation_k is None:
+            return False
+        if float(obs[self.comfort_now_idx]) <= 0.5:
+            return False
+
+        low, high = self._comfort_band
+        limit = self.urgent_deviation_k
+        for ctrl in self.ahu_controllers:
+            for _vav_id, obs_idx, _ in ctrl["zones"]:
+                temp = self._denormalize_zone_temp(obs[obs_idx])
+                if temp < low - limit or temp > high + limit:
+                    return True
+        return False
 
     @property
     def name(self) -> str:
@@ -135,6 +172,12 @@ class FanEconomyPolicy(DeadlineBandPolicy):
         discrete = action["discrete_action"]
 
         any_heating = False
+
+        # While the shortfall is actually being charged for, the fan is worth
+        # whatever it costs: see `urgent_deviation_k`. Only the pressure
+        # rewrite is suspended -- the water floor below still applies, because
+        # a hotter loop speeds delivery rather than slowing it.
+        economise = not self._is_urgent(obs)
 
         for ctrl in self.ahu_controllers:
             pressure_idx = ctrl.get("pressure_idx")
@@ -153,9 +196,11 @@ class FanEconomyPolicy(DeadlineBandPolicy):
 
             if effort > 0.0:
                 any_heating = True
-                if self.heating_pressure is not None:
+                if economise and self.heating_pressure is not None:
                     continuous[pressure_idx] = np.float32(self.heating_pressure)
             elif effort < 0.0:
+                if not economise:
+                    continue
                 current = float(continuous[pressure_idx])
                 # Scale towards the floor rather than towards zero: zero is the
                 # middle of the range, not the minimum.
