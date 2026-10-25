@@ -19,69 +19,89 @@ _OURS: dict[str, tuple[str, str]] = {
     "fan": ("hvaclab.policies.fan_economy", "FanEconomyPolicy"),
 }
 
-# Parameter variants, for ablation. The right setback depth is climate
-# dependent -- `fixed_setpoint`, which sets back not at all, beats `pid_water`
-# on `fairbanks_1` -- so it is measured rather than assumed. Each entry is
-# (policy key, constructor kwargs).
+# Parameter variants, for ablation. Each entry is (policy key, kwargs).
 #
-# `band_flat` is the control: zero setback, so it isolates how much of any
-# change comes from the band logic rather than from the setback itself.
-_VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
+# ---------------------------------------------------------------------------
+# MEASURED: the setback hypothesis is wrong. Deeper is worse.
+# ---------------------------------------------------------------------------
+# Full 8,640-step episodes on fairbanks_1 / singapore_6 / phoenix_4, mean of
+# the three (lower is better):
+#
+#   band_flat  (setback 0)      0.12321    <- best
+#   fixed_setpoint             0.12575
+#   pid_water                  0.13478
+#   band_s5                    0.16017
+#   band_s8                    0.18320
+#   band_asym                  0.19597
+#
+# Holding the comfort band around the clock beats every setback depth tried,
+# and beats pid_water by 8.6%. The decomposition says why: band_flat's comfort
+# term is 0.0347 against pid_water's 0.0603, bought with energy 0.0411 against
+# 0.0371 and carbon 0.0474 against 0.0374.
+#
+# Which is exactly the 35:1 price ratio asserting itself. Comfort is worth far
+# more than energy *while it is scored*, and a building held in band overnight
+# starts the morning with no deviation to recover -- so it never pays the
+# recovery penalty, and the recovery penalty is larger than the holding cost.
+# Steady beats cycling, as fixed_setpoint already hinted by beating pid_water.
+#
+# So the setback entries are kept as the record of a refuted hypothesis, and
+# everything built after this point starts from the flat band.
+_SETBACK_ABLATION: dict[str, tuple[str, dict[str, Any]]] = {
     "band_flat": ("band", {"setback_k": 0.0, "setup_k": 0.0}),
     "band_s3": ("band", {"setback_k": 3.0, "setup_k": 3.0}),
     "band_s5": ("band", {"setback_k": 5.0, "setup_k": 3.0}),
     "band_s8": ("band", {"setback_k": 8.0, "setup_k": 5.0}),
-    "band_s5_lead6": ("band", {"setback_k": 5.0, "setup_k": 3.0,
-                               "lead_hours": 6.0}),
-    "band_s8_lead6": ("band", {"setback_k": 8.0, "setup_k": 5.0,
-                               "lead_hours": 6.0}),
-    # Cooling is the cheapest thermal kilowatt-hour here (0.0018 per kWh at
-    # COP 3.5, against 0.0034 for gas heat), so the hot side can afford a
-    # deeper setback than the cold side. The shipped eco band uses 5 K down
-    # and only 1 K up; this inverts that asymmetry to test it.
     "band_asym": ("band", {"setback_k": 2.0, "setup_k": 8.0}),
+}
+
+# ---------------------------------------------------------------------------
+# Built on the flat band. `FLAT` is spread into each so none of them silently
+# inherits the refuted 5 K default.
+# ---------------------------------------------------------------------------
+FLAT: dict[str, Any] = {"setback_k": 0.0, "setup_k": 0.0}
+
+_VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
+    **_SETBACK_ABLATION,
+
+    # The new reference point: band_flat under its own name, so later tables
+    # do not have to explain why the control is called "flat".
+    "v0": ("band", {**FLAT}),
+
     # Aim inside the scored band rather than at its edge. The penalty is flat
     # zero anywhere inside, so the edge buys nothing and risks everything:
     # pid idles the moment a zone is in band, and a zone parked on the edge
     # drifts straight across it.
-    "band_m05": ("band", {"setback_k": 5.0, "setup_k": 3.0,
-                          "comfort_margin_k": 0.5}),
-    "band_m10": ("band", {"setback_k": 5.0, "setup_k": 3.0,
-                          "comfort_margin_k": 1.0}),
+    "v_m05": ("band", {**FLAT, "comfort_margin_k": 0.5}),
+    "v_m10": ("band", {**FLAT, "comfort_margin_k": 1.0}),
 
-    # Fan-work variants. `fan_ctrl` reproduces pid's own pressure law, so it
-    # isolates the effect of the heating clamp from everything else in the
-    # class; any difference between it and the matching `band_*` entry is a
-    # bug, not a result.
-    "fan_ctrl": ("fan", {"heating_pressure": None,
-                         "cooling_pressure_gain": 1.0}),
-    "fan_heat_floor": ("fan", {"heating_pressure": -1.0,
-                               "cooling_pressure_gain": 1.0}),
-    "fan_both": ("fan", {"heating_pressure": -1.0,
-                         "cooling_pressure_gain": 0.6}),
-    "fan_cool_only": ("fan", {"heating_pressure": None,
-                              "cooling_pressure_gain": 0.6}),
+    # Fan work. band_flat buys its comfort with energy and carbon, so the
+    # pressure law is where that bill can be cut. `v_fan_ctrl` reproduces
+    # pid's own law, so any gap between it and `v0` is a bug, not a result.
+    "v_fan_ctrl": ("fan", {**FLAT, "heating_pressure": None,
+                           "cooling_pressure_gain": 1.0}),
+    "v_fan_heat": ("fan", {**FLAT, "heating_pressure": -1.0,
+                           "cooling_pressure_gain": 1.0}),
+    "v_fan_cool": ("fan", {**FLAT, "heating_pressure": None,
+                           "cooling_pressure_gain": 0.6}),
+    "v_fan": ("fan", {**FLAT, "heating_pressure": -1.0,
+                      "cooling_pressure_gain": 0.6}),
     # Quiet fan paired with a hot loop. Heat delivered is airflow times the
     # coil's temperature rise, so taking the flow away without raising the
     # water temperature would just under-deliver.
-    "fan_hot_water": ("fan", {"heating_pressure": -1.0,
-                              "cooling_pressure_gain": 0.6,
-                              "heating_water_floor": 0.5}),
-    "fan_hot_water_max": ("fan", {"heating_pressure": -1.0,
-                                  "cooling_pressure_gain": 0.6,
-                                  "heating_water_floor": 1.0}),
-    # Economise only while the shortfall is not being charged for. A quiet fan
-    # delivers heat slowly, and slow is cheap only when nobody is paying for
-    # the deviation; inside the scored window with a zone 1 K out, comfort is
-    # worth 19 kWh per step, so the fan is worth whatever it costs.
-    "fan_urgent1": ("fan", {"heating_pressure": -1.0,
-                            "cooling_pressure_gain": 0.6,
-                            "heating_water_floor": 0.5,
-                            "urgent_deviation_k": 1.0}),
-    "fan_urgent0": ("fan", {"heating_pressure": -1.0,
-                            "cooling_pressure_gain": 0.6,
-                            "heating_water_floor": 0.5,
-                            "urgent_deviation_k": 0.0}),
+    "v_fan_hw": ("fan", {**FLAT, "heating_pressure": -1.0,
+                         "cooling_pressure_gain": 0.6,
+                         "heating_water_floor": 0.5}),
+    # Economise only while the shortfall is not being charged for.
+    "v_fan_urg": ("fan", {**FLAT, "heating_pressure": -1.0,
+                          "cooling_pressure_gain": 0.6,
+                          "heating_water_floor": 0.5,
+                          "urgent_deviation_k": 1.0}),
+    # The two leading ideas together.
+    "v_fan_m05": ("fan", {**FLAT, "comfort_margin_k": 0.5,
+                          "heating_pressure": -1.0,
+                          "cooling_pressure_gain": 0.6,
+                          "heating_water_floor": 0.5}),
 }
 
 
