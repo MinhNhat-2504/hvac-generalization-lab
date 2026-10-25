@@ -111,6 +111,16 @@ class DeadlineBandPolicy(PIDWaterResetPolicy):
             cheapest thermal kilowatt-hour available here.
         lead_hours: Over how long before the window opens the band narrows back
             to the comfort band. This is the recovery time the plant is given.
+        comfort_margin_k: How far *inside* the comfort band to aim while the
+            building is being scored.
+
+            The penalty is flat zero anywhere inside the band, so aiming at
+            the edge buys nothing and risks everything: ``pid`` idles as soon
+            as a zone is in band, the zone then drifts, and a zone parked on
+            the edge drifts straight across it. A margin converts that drift
+            into slack. It costs a little energy to hold and, at 35:1 against
+            comfort, that is a trade worth making -- 1 K of occupied deviation
+            costs 0.12 per step against 0.0064 per kWh.
     """
 
     def __init__(
@@ -120,6 +130,7 @@ class DeadlineBandPolicy(PIDWaterResetPolicy):
         setback_k: float = 5.0,
         setup_k: float = 3.0,
         lead_hours: float = 3.0,
+        comfort_margin_k: float = 0.0,
         **kwargs,
     ) -> None:
         super().__init__(building_meta_data, action_spec, **kwargs)
@@ -127,6 +138,7 @@ class DeadlineBandPolicy(PIDWaterResetPolicy):
         self.setback_k = float(setback_k)
         self.setup_k = float(setup_k)
         self.lead_steps = max(1.0, float(lead_hours) * STEPS_PER_HOUR)
+        self.comfort_margin_k = float(comfort_margin_k)
 
         names = list(self.field_names)
         # `comfort_mode_now` is the environment's own
@@ -186,7 +198,14 @@ class DeadlineBandPolicy(PIDWaterResetPolicy):
         # docstring -- this is where the first attempt lost most of its score.
         if float(obs[self.comfort_now_idx]) > 0.5:
             self.band_log["scored"] += 1
-            return low, high
+            margin = self.comfort_margin_k
+            if margin <= 0.0:
+                return low, high
+            # Keep the aim band non-empty however wide the margin is asked to
+            # be: a band whose edges have crossed would have the controller
+            # heating and cooling the same zone at once.
+            margin = min(margin, max(0.0, (high - low) / 2.0 - 0.1))
+            return low + margin, high - margin
 
         hour, day = self._get_hour_and_day(obs)
         steps_left = self._steps_until_window(hour, day)

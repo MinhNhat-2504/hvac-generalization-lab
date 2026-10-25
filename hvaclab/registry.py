@@ -40,6 +40,14 @@ _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     # deeper setback than the cold side. The shipped eco band uses 5 K down
     # and only 1 K up; this inverts that asymmetry to test it.
     "band_asym": ("band", {"setback_k": 2.0, "setup_k": 8.0}),
+    # Aim inside the scored band rather than at its edge. The penalty is flat
+    # zero anywhere inside, so the edge buys nothing and risks everything:
+    # pid idles the moment a zone is in band, and a zone parked on the edge
+    # drifts straight across it.
+    "band_m05": ("band", {"setback_k": 5.0, "setup_k": 3.0,
+                          "comfort_margin_k": 0.5}),
+    "band_m10": ("band", {"setback_k": 5.0, "setup_k": 3.0,
+                          "comfort_margin_k": 1.0}),
 
     # Fan-work variants. `fan_ctrl` reproduces pid's own pressure law, so it
     # isolates the effect of the heating clamp from everything else in the
