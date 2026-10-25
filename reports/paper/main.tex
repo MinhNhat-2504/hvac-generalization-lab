@@ -347,6 +347,25 @@ more cold air than the extra flow delivers.
 \paragraph{Capping the hot-water pump.} Also electricity, also pinned at
 maximum by the baseline, and also worse when capped ($0.051$ against $0.050$).
 
+\paragraph{Everything aimed at the comfort term.} After the fan clamp, comfort
+is $70$--$75\%$ of what is left on all three sets, so it should be where the
+remaining score is. It is not. Against a reference of $0.0503$ on the three
+hard scenarios: reading each zone's band from its own setpoint sensors
+$0.0548$; a stiffer loop, $k_p$ $0.5\!\to\!1.0$, $0.0794$; dampers opening at
+$1$\,K instead of $2$\,K $0.0897$, and at $0.5$\,K $0.1117$; driving the
+air-handler loop from its worst zone rather than the mean $0.0970$; a
+per-zone damper gate that withholds airflow from a zone the supply air cannot
+help $0.0626$.
+
+Six attempts, all worse, and the shape of the failure is consistent. Four of
+them---margin, $k_p$, damper gain, worst-zone---amount to driving harder, and
+each loses by oscillating across the band it was meant to hold. \textbf{The
+shipped gains sit near a local optimum for this control structure.}
+
+Two of these also answer questions the starter kit leaves open: it describes
+both the sensor band and the worst-zone loop in its own documentation, and
+ships with both switched off. Our measurements say it was right to.
+
 \section{A note on the shipped baseline table}
 
 The starter kit ships \texttt{baseline\_returns.json}, and
@@ -373,6 +392,22 @@ dimensionless, with no fitted constants and nothing to transfer, and its sign
 is the same on every set we measured because it acts through a
 constraint---the $70\%$ recirculation cap---that is a property of the plant
 rather than of any building.
+
+There is a sharper version of the claim, and the negative results are what
+support it. Of nine changes we measured, one moved the score and eight did
+not. The one that worked is a \emph{pricing} correction---the controller was
+buying the most expensive fuel in order to import the load it was trying to
+remove. The eight that failed were all attempts to make the controller
+\emph{track better}: tighter targets, stiffer gains, faster dampers, a
+different zone to aim at. Every one of them lost.
+
+\textbf{So the headroom over the reference controllers in this benchmark is
+not in control quality. They are competent controllers that are priced
+wrong.} That is worth saying because it inverts where effort naturally goes.
+A policy-learning method pointed at this environment will spend its capacity
+learning to track, which is the part already near its local optimum, and the
+part that actually pays is a property of the plant and the reward that is
+visible by reading them.
 
 Its \emph{magnitude}, though, is a property of the evaluation set, and that is
 the part we would most want other entrants to take from this. The difference
