@@ -42,6 +42,7 @@ from __future__ import annotations
 import argparse
 import random
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -104,7 +105,17 @@ def free_weather_strips() -> dict[str, list[str]]:
 
 
 def _run(args: list[str], check: bool = True) -> bool:
-    """Run a generator subprocess. Returns whether it succeeded."""
+    """Run a generator subprocess. Returns whether it succeeded.
+
+    Every path handed to a generator goes in as ``Path.as_posix()``, never
+    ``str(Path)``. The scenario generator writes the output directory into the
+    gin config as a bare string, and gin parses that string with Python escape
+    semantics -- so a Windows path arrives as literal control characters:
+    ``dev\\building_9000`` becomes ``dev\\x08uilding_9000`` and
+    ``\\floor_plan.npy`` becomes ``\\x0cloor_plan.npy``. The whole set then
+    fails at load with ``OSError: [Errno 22] Invalid argument``. Forward
+    slashes survive the round trip, and Windows accepts them everywhere here.
+    """
     proc = subprocess.run(args, capture_output=True, text=True)
     if proc.returncode != 0 and check:
         tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-1:]
@@ -118,9 +129,46 @@ def generate_buildings(seeds: list[int]) -> list[str]:
         sys.executable, "-m", "smart_buildings.run_floor_generator",
         "--seeds", *[str(s) for s in seeds],
         "--no-pdf",
-        "--output-dir", str(BUILDINGS_DIR),
+        "--output-dir", BUILDINGS_DIR.as_posix(),
     ])
     return [f"building_{s:04d}" for s in seeds]
+
+
+#: gin keys whose value is a filesystem path written by the scenario generator.
+_PATH_KEYS = ("floor_plan_filepath", "zone_map_filepath", "metrics_path")
+
+
+def normalise_gin_paths(scenario_dir: Path) -> None:
+    """Rewrite Windows separators in the generated ``config.gin`` paths.
+
+    The scenario generator joins its output path with ``Path`` and writes the
+    result into gin as a bare double-quoted string. gin then parses that string
+    with Python escape semantics, so on Windows every separator that happens to
+    precede a recognised escape letter becomes a control character::
+
+        "...\\dev\\building_9000\\floor_plan.npy"
+          ->  "...\\dev\\x08uilding_9000\\x0cloor_plan.npy"
+
+    which fails at load with ``OSError: [Errno 22] Invalid argument``. The
+    shipped scenarios do not hit this because they were generated on a
+    platform whose separator is already ``/``.
+
+    Passing ``--output-dir`` in posix form is not enough on its own: the
+    generator re-joins the path internally before writing it. So the file is
+    fixed after the fact, which also keeps the starter kit unmodified.
+    """
+    gin_file = scenario_dir / "config.gin"
+    if not gin_file.exists():
+        return
+    lines = gin_file.read_text().splitlines(keepends=True)
+    changed = False
+    for i, line in enumerate(lines):
+        key = line.split("=", 1)[0].strip()
+        if key in _PATH_KEYS and "\\" in line:
+            lines[i] = line.replace("\\", "/")
+            changed = True
+    if changed:
+        gin_file.write_text("".join(lines))
 
 
 def count_zones_and_ahus(scenario_dir: Path) -> tuple[int, int]:
@@ -194,14 +242,14 @@ def build_valid_set(
         return _run([
             sys.executable, "-m", "smart_buildings.run_floor_generator",
             "--seeds", str(s), "--no-pdf",
-            "--output-dir", str(BUILDINGS_DIR),
+            "--output-dir", BUILDINGS_DIR.as_posix(),
         ])
 
     def scenarios(name: str) -> bool:
         return _run([
             sys.executable, "-m", "smart_buildings.run_scenario_generator",
             "--buildings", name, "--weathers", *weathers,
-            "--output-dir", str(output_dir),
+            "--output-dir", output_dir.as_posix(),
         ])
 
     while len(accepted) < count and attempts < max_attempts:
@@ -219,11 +267,22 @@ def build_valid_set(
         # range, scale the footprint towards it and build again. Zone count is
         # not a closed form of the footprint -- the generator partitions the
         # plan -- so this is a measured correction rather than a calculation.
+        # Each attempt starts from an empty directory for this building, and a
+        # building that ends up unusable leaves none behind. Otherwise a
+        # rescale that succeeded at the wrong size and then failed on the retry
+        # would leave those scenarios on disk, and `describe` -- which reads
+        # the directory, not this function's bookkeeping -- would report them
+        # as part of the set. That is how a 20-zone building first got into a
+        # set whose whole point is to match the stated 28-85 range.
+        built = output_dir / name
         ok = False
         for _ in range(3):
+            shutil.rmtree(built, ignore_errors=True)
             if not scenarios(name):
                 break
-            zones, ahus = count_zones_and_ahus(output_dir / name / weathers[0])
+            for weather in weathers:
+                normalise_gin_paths(built / weather)
+            zones, ahus = count_zones_and_ahus(built / weathers[0])
             if MIN_ZONES <= zones <= MAX_ZONES:
                 print(f"  seed {seed}: ok -> {name} "
                       f"({zones} zones, {ahus} AHUs)")
@@ -237,6 +296,7 @@ def build_valid_set(
         if ok:
             accepted.append(name)
         else:
+            shutil.rmtree(built, ignore_errors=True)
             print(f"  seed {seed}: unusable, skipping")
 
         seed += 1
