@@ -40,6 +40,8 @@ seed and must not become something that gets tuned against by being checked in.
 from __future__ import annotations
 
 import argparse
+import random
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -60,8 +62,24 @@ TEST_SEED_START = 9500
 # both building and climate at once.
 UNSEEN_STATION = "minneapolis"
 
-# Competition-stated range for the evaluation buildings.
+# Competition-stated range for the evaluation buildings: 28-85 zones, 3-9 air
+# handlers, 2-4 floors. The shipped six land exactly inside it (30-85 zones,
+# 3-9 AHUs, 318-430 x 188-301 ft).
 MIN_ZONES, MAX_ZONES = 28, 85
+
+# The floor generator's own default footprint is width (400, 700) x height
+# (300, 500), which is much larger than any shipped building and produces
+# buildings far outside the stated evaluation range -- seed 9000 at the default
+# came out with 162 zones and 17 air handlers. Since the scenario generator
+# sets `num_ahus = ceil(zones / 10)`, an oversized footprint also multiplies
+# simulation cost, and a holdout set that is both unrepresentative and slow is
+# the worst of both.
+#
+# So the footprint is drawn from the shipped six's own range instead. Taken
+# from their YAMLs, with a little margin.
+FOOTPRINT_WIDTH = (315, 435)
+FOOTPRINT_HEIGHT = (185, 305)
+FLOOR_CHOICES = (2, 3, 4)
 
 
 def used_weather_strips() -> set[str]:
@@ -105,6 +123,52 @@ def generate_buildings(seeds: list[int]) -> list[str]:
     return [f"building_{s:04d}" for s in seeds]
 
 
+def count_zones_and_ahus(scenario_dir: Path) -> tuple[int, int]:
+    """Realised zone and air-handler counts, read from a built scenario.
+
+    Taken from ``config.gin`` because that is what the simulator consumes.
+    ``config.yaml`` carries the *requested* ``num_ahus``, which the scenario
+    generator then raises to ``ceil(zones / 10)``, so it is not the answer.
+    """
+    text = (scenario_dir / "config.gin").read_text()
+    zones = len(set(re.findall(r"room_\d+", text)))
+    ahus = len(re.findall(r"(?m)^ahu_\d+/AirHandler:", text))
+    return zones, ahus
+
+
+def resize_building(seed: int, rng: random.Random) -> tuple[int, int]:
+    """Rewrite a generated building's footprint into the shipped range.
+
+    Returns the (width, height) written. The rest of the generated config --
+    room sizes, shape, composite style and the stratified materials block --
+    is left exactly as the official generator produced it, so the only thing
+    changed is the overall size.
+    """
+    path = BUILDINGS_DIR / f"building_{seed:04d}.yaml"
+    spec = yaml.safe_load(path.read_text())
+    width = rng.randint(*FOOTPRINT_WIDTH)
+    height = rng.randint(*FOOTPRINT_HEIGHT)
+    spec["floor_plan"]["width"] = width
+    spec["floor_plan"]["height"] = height
+    spec["floor_plan"]["num_floors"] = rng.choice(FLOOR_CHOICES)
+    path.write_text(yaml.safe_dump(spec, sort_keys=False))
+    return width, height
+
+
+def rescale_building(seed: int, factor: float) -> None:
+    """Scale a building's footprint by ``factor`` in each dimension.
+
+    Zone count goes roughly with floor area, so to move from ``zones`` to
+    ``target`` the caller passes ``sqrt(target / zones)``.
+    """
+    path = BUILDINGS_DIR / f"building_{seed:04d}.yaml"
+    spec = yaml.safe_load(path.read_text())
+    fp = spec["floor_plan"]
+    fp["width"] = max(FOOTPRINT_WIDTH[0] - 60, int(round(fp["width"] * factor)))
+    fp["height"] = max(FOOTPRINT_HEIGHT[0] - 60, int(round(fp["height"] * factor)))
+    path.write_text(yaml.safe_dump(spec, sort_keys=False))
+
+
 def build_valid_set(
     seed_start: int, count: int, weathers: list[str], output_dir: Path,
     max_attempts: int = 40,
@@ -124,29 +188,56 @@ def build_valid_set(
     accepted: list[str] = []
     seed = seed_start
     attempts = 0
+    rng = random.Random(seed_start)
+
+    def floors(s: int) -> bool:
+        return _run([
+            sys.executable, "-m", "smart_buildings.run_floor_generator",
+            "--seeds", str(s), "--no-pdf",
+            "--output-dir", str(BUILDINGS_DIR),
+        ])
+
+    def scenarios(name: str) -> bool:
+        return _run([
+            sys.executable, "-m", "smart_buildings.run_scenario_generator",
+            "--buildings", name, "--weathers", *weathers,
+            "--output-dir", str(output_dir),
+        ])
 
     while len(accepted) < count and attempts < max_attempts:
         attempts += 1
         name = f"building_{seed:04d}"
-        if not _run([
-            sys.executable, "-m", "smart_buildings.run_floor_generator",
-            "--seeds", str(seed), "--no-pdf",
-            "--output-dir", str(BUILDINGS_DIR),
-        ]):
+
+        if not floors(seed):
             print(f"  seed {seed}: floor generation failed, skipping")
             seed += 1
             continue
 
-        if _run([
-            sys.executable, "-m", "smart_buildings.run_scenario_generator",
-            "--buildings", name,
-            "--weathers", *weathers,
-            "--output-dir", str(output_dir),
-        ]):
+        resize_building(seed, rng)
+
+        # Build, measure, and if the realised zone count missed the stated
+        # range, scale the footprint towards it and build again. Zone count is
+        # not a closed form of the footprint -- the generator partitions the
+        # plan -- so this is a measured correction rather than a calculation.
+        ok = False
+        for _ in range(3):
+            if not scenarios(name):
+                break
+            zones, ahus = count_zones_and_ahus(output_dir / name / weathers[0])
+            if MIN_ZONES <= zones <= MAX_ZONES:
+                print(f"  seed {seed}: ok -> {name} "
+                      f"({zones} zones, {ahus} AHUs)")
+                ok = True
+                break
+            target = (MIN_ZONES + MAX_ZONES) / 2
+            print(f"  seed {seed}: {zones} zones outside "
+                  f"{MIN_ZONES}-{MAX_ZONES}, rescaling")
+            rescale_building(seed, (target / max(zones, 1)) ** 0.5)
+
+        if ok:
             accepted.append(name)
-            print(f"  seed {seed}: ok -> {name}")
         else:
-            print(f"  seed {seed}: rejected by the scenario generator, skipping")
+            print(f"  seed {seed}: unusable, skipping")
 
         seed += 1
 
@@ -157,25 +248,21 @@ def build_valid_set(
 
 
 def describe(output_dir: Path) -> list[dict]:
-    """Zone and air-handler counts for everything built under ``output_dir``.
-
-    Read from each scenario's own ``config.yaml`` rather than recomputed, so
-    the numbers are the ones the simulator will actually use.
-    """
+    """Zone and air-handler counts for everything built under ``output_dir``."""
     rows = []
     for building_dir in sorted(Path(output_dir).iterdir()):
         if not building_dir.is_dir():
             continue
         for scenario_dir in sorted(building_dir.iterdir()):
-            cfg = scenario_dir / "config.yaml"
-            if not cfg.exists():
+            if not (scenario_dir / "config.gin").exists():
                 continue
-            spec = yaml.safe_load(cfg.read_text()) or {}
+            zones, ahus = count_zones_and_ahus(scenario_dir)
+            spec = yaml.safe_load((scenario_dir / "config.yaml").read_text()) or {}
             rows.append({
                 "building": building_dir.name,
                 "weather": scenario_dir.name,
-                "zones": spec.get("num_zones"),
-                "ahus": spec.get("num_ahus"),
+                "zones": zones,
+                "ahus": ahus,
                 "floors": (spec.get("floor_plan") or {}).get("num_floors"),
             })
     return rows
@@ -231,14 +318,14 @@ def main() -> None:
 
         rows = describe(HOLDOUT_DIR / split)
         print(f"\n[{split}] {len(rows)} scenarios")
-        seen = {}
+        seen: dict[str, tuple[int, int, int | None]] = {}
         for r in rows:
             seen[r["building"]] = (r["zones"], r["ahus"], r["floors"])
         for b, (z, a, f) in sorted(seen.items()):
             flag = ""
-            if isinstance(z, int) and not (MIN_ZONES <= z <= MAX_ZONES):
-                flag = f"  <-- outside the stated {MIN_ZONES}-{MAX_ZONES} zone range"
-            print(f"  {b:16s} zones={z} ahus={a} floors={f}{flag}")
+            if not (MIN_ZONES <= z <= MAX_ZONES):
+                flag = f"  <-- outside the stated {MIN_ZONES}-{MAX_ZONES} zones"
+            print(f"  {b:16s} zones={z:3d} ahus={a:2d} floors={f}{flag}")
 
     print(f"\nholdout scenarios under {HOLDOUT_DIR}/ (git-ignored)")
     print("evaluate with:")
