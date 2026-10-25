@@ -61,3 +61,8 @@ experiments/traces/
 # become a place where holdout material is tuned against.
 smart_buildings/buildings/*.yaml
 !smart_buildings/buildings/building_train_*.yaml
+
+# Generated submission bundle. Rebuild with
+# `python -m hvaclab.submission.build --verify`; the sources it assembles from
+# are tracked, the assembly is not.
+experiments/submission/
