@@ -17,6 +17,7 @@ _OURS: dict[str, tuple[str, str]] = {
     "occ": ("hvaclab.policies.occupancy_gated", "OccupancyGatedPolicy"),
     "band": ("hvaclab.policies.deadline_band", "DeadlineBandPolicy"),
     "fan": ("hvaclab.policies.fan_economy", "FanEconomyPolicy"),
+    "zone": ("hvaclab.policies.zone_aware", "ZoneAwarePolicy"),
 }
 
 # Parameter variants, for ablation. Each entry is (policy key, kwargs).
@@ -183,6 +184,32 @@ _X: dict[str, tuple[str, dict[str, Any]]] = {
                          "reheat_full_k": 0.5}),
 }
 _W.update(_X)
+
+# ---------------------------------------------------------------------------
+# Per-zone control. After the fan clamp, comfort is 70-75% of the remaining
+# loss on all three sets, so this is where the rest of the score is.
+#
+# The shipped chain drives each damper from abs(zone_error), which never asks
+# whether the air about to arrive is on the useful side of that zone's
+# temperature. A handler heating for its average zone therefore opens the
+# damper of a zone that is already too hot, in proportion to how hot it is.
+#
+# `z_ctrl` disables the gate, so it must reproduce x_heatonly exactly; any
+# difference between them is a bug rather than a result.
+_Z: dict[str, tuple[str, dict[str, Any]]] = {
+    "z_ctrl": ("zone", {**_FAN, "cooling_pressure_gain": 1.0,
+                        "reheat_full_k": 0.5,
+                        "require_useful_air": False}),
+    "z_gate": ("zone", {**_FAN, "cooling_pressure_gain": 1.0,
+                        "reheat_full_k": 0.5,
+                        "require_useful_air": True,
+                        "useful_air_margin_k": 0.5}),
+    "z_gate0": ("zone", {**_FAN, "cooling_pressure_gain": 1.0,
+                         "reheat_full_k": 0.5,
+                         "require_useful_air": True,
+                         "useful_air_margin_k": 0.0}),
+}
+_W.update(_Z)
 
 _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     **_SETBACK_ABLATION,
