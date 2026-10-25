@@ -1,0 +1,69 @@
+{
+  "results": [
+    {
+      "building": "building_train_8",
+      "weather": "phoenix_4",
+      "policy": "occ",
+      "steps": 8640,
+      "total_reward": -1829.6752259238954,
+      "mean_reward": -0.21176796596341382,
+      "prod_regret": -1618.3740500160493,
+      "energy_cost": 2853.9673281000864,
+      "carbon": 1439.2866570716958,
+      "occupied_steps": 3112,
+      "reward_occupied": -1582.8737351372838,
+      "reward_unoccupied": -246.80149078661083,
+      "mean_occupancy": 10.956597222222221,
+      "seconds": 11939.919597387314,
+      "error": ""
+    },
+    {
+      "building": "building_train_7",
+      "weather": "singapore_6",
+      "policy": "occ",
+      "steps": 8640,
+      "total_reward": -881.8012652898292,
+      "mean_reward": -0.10206033163076726,
+      "prod_regret": -862.7256869783014,
+      "energy_cost": 1181.81733527887,
+      "carbon": 639.0119289990707,
+      "occupied_steps": 3098,
+      "reward_occupied": -830.3752302096691,
+      "reward_unoccupied": -51.42603508016009,
+      "mean_occupancy": 6.461226851851852,
+      "seconds": 11968.299812316895,
+      "error": ""
+    },
+    {
+      "building": "building_train_1",
+      "weather": "fairbanks_1",
+      "policy": "occ",
+      "steps": 8640,
+      "total_reward": -1970.2262201214035,
+      "mean_reward": -0.22803544214368096,
+      "prod_regret": -860.090831605019,
+      "energy_cost": 2827.1709296744157,
+      "carbon": 4443.687683900673,
+      "occupied_steps": 2964,
+      "reward_occupied": -1140.7053125025705,
+      "reward_unoccupied": -829.520907618833,
+      "mean_occupancy": 13.433564814814815,
+      "seconds": 12116.510766506195,
+      "error": ""
+    }
+  ],
+  "summary": {
+    "occ": {
+      "score": 0.18062124657928735,
+      "n": 3,
+      "worst": 0.22803544214368096,
+      "worst_scenario": "building_train_1/fairbanks_1",
+      "loss_occupied": 3553.9542778495234,
+      "loss_unoccupied": 1127.748433485604,
+      "occupied_step_frac": 0.3539351851851852,
+      "w_prod": 0.07734237427313355,
+      "w_energy": 0.05295490426738713,
+      "w_carbon": 0.05032396813249568
+    }
+  }
+}
