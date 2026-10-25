@@ -127,6 +127,29 @@ for _dk in (4.0, 8.0):
 # the episode at saturation.
 _W["w_kp025"] = ("fan", {**_FAN, "kp": 0.25})
 
+# ---------------------------------------------------------------------------
+# MEASURED, round 2. Small gains, and one more refutation.
+# ---------------------------------------------------------------------------
+#   w_reheat05  0.04730   v_fan + reheat valve saturating at 0.5 K
+#   w_reheat10  0.04821
+#   w_cool030   0.04870   cooling pressure x0.30
+#   w_cool045   0.04887
+#   v_fan       0.04967   (reference)
+#   w_pump00    0.05090   capping the pump is WORSE -- refuted
+#   w_cool080   0.05100
+#
+# Opening the reheat valve sooner helps, and it helps where predicted:
+# fairbanks_1 0.0797 -> 0.0725, with singapore and phoenix unmoved. A deeper
+# cooling clamp helps phoenix (0.0430 -> 0.0382) and costs singapore
+# (0.0263 -> 0.0282), so it is a climate trade rather than a free gain.
+#
+# These are 5% effects against the fan clamp's 63%, which is the scale at
+# which tuning on three scenarios starts fitting the three scenarios. So the
+# combination is carried to the full 30 and to the holdout sets rather than
+# tuned further here.
+_W["w_combo"] = ("fan", {**_FAN, "reheat_full_k": 0.5,
+                         "cooling_pressure_gain": 0.3})
+
 _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     **_SETBACK_ABLATION,
 
