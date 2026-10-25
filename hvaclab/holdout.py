@@ -134,41 +134,47 @@ def generate_buildings(seeds: list[int]) -> list[str]:
     return [f"building_{s:04d}" for s in seeds]
 
 
-#: gin keys whose value is a filesystem path written by the scenario generator.
-_PATH_KEYS = ("floor_plan_filepath", "zone_map_filepath", "metrics_path")
+# Any quoted string in a generated config that points into the package tree.
+# Matched on content rather than on a list of keys: an allowlist of keys
+# (floor_plan_filepath, zone_map_filepath, metrics_path) missed
+# `weather_csv_path`, which is single-quoted, and the resulting half-fix let
+# exactly the strips whose names begin with an escape letter fail -- atlanta
+# (\a) and fairbanks (\f) -- while denver, phoenix and singapore loaded fine.
+# A rule that depends on which letter follows the separator is not a rule.
+_GIN_PATH = re.compile(r"""(['"])((?:\.{0,2}[/\\])?smart_buildings[\\/][^'"]*)\1""")
 
 
 def normalise_gin_paths(scenario_dir: Path) -> None:
-    """Rewrite Windows separators in the generated ``config.gin`` paths.
+    """Rewrite Windows separators in a generated ``config.gin``.
 
     The scenario generator joins its output path with ``Path`` and writes the
-    result into gin as a bare double-quoted string. gin then parses that string
-    with Python escape semantics, so on Windows every separator that happens to
-    precede a recognised escape letter becomes a control character::
+    result into gin as a quoted string. gin parses that string with Python
+    escape semantics, so on Windows every separator that happens to precede a
+    recognised escape letter becomes a control character::
 
-        "...\\dev\\building_9000\\floor_plan.npy"
-          ->  "...\\dev\\x08uilding_9000\\x0cloor_plan.npy"
+        '...\\dev\\building_9000\\floor_plan.npy'
+          ->  '...\\dev\\x08uilding_9000\\x0cloor_plan.npy'
+        'smart_buildings\\weather\\csv\\atlanta.csv'
+          ->  'smart_buildings\\weather\\csv\\x07tlanta.csv'
 
-    which fails at load with ``OSError: [Errno 22] Invalid argument``. The
-    shipped scenarios do not hit this because they were generated on a
+    both of which fail at load with ``OSError: [Errno 22] Invalid argument``.
+    The shipped scenarios are unaffected because they were generated on a
     platform whose separator is already ``/``.
 
     Passing ``--output-dir`` in posix form is not enough on its own: the
-    generator re-joins the path internally before writing it. So the file is
+    generator re-joins paths internally before writing them. So the file is
     fixed after the fact, which also keeps the starter kit unmodified.
     """
     gin_file = scenario_dir / "config.gin"
     if not gin_file.exists():
         return
-    lines = gin_file.read_text().splitlines(keepends=True)
-    changed = False
-    for i, line in enumerate(lines):
-        key = line.split("=", 1)[0].strip()
-        if key in _PATH_KEYS and "\\" in line:
-            lines[i] = line.replace("\\", "/")
-            changed = True
-    if changed:
-        gin_file.write_text("".join(lines))
+    text = gin_file.read_text()
+    fixed = _GIN_PATH.sub(
+        lambda m: f"{m.group(1)}{m.group(2).replace(chr(92), '/')}{m.group(1)}",
+        text,
+    )
+    if fixed != text:
+        gin_file.write_text(fixed)
 
 
 def count_zones_and_ahus(scenario_dir: Path) -> tuple[int, int]:
