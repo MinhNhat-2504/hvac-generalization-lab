@@ -53,6 +53,15 @@ _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
                          "cooling_pressure_gain": 0.6}),
     "fan_cool_only": ("fan", {"heating_pressure": None,
                               "cooling_pressure_gain": 0.6}),
+    # Quiet fan paired with a hot loop. Heat delivered is airflow times the
+    # coil's temperature rise, so taking the flow away without raising the
+    # water temperature would just under-deliver.
+    "fan_hot_water": ("fan", {"heating_pressure": -1.0,
+                              "cooling_pressure_gain": 0.6,
+                              "heating_water_floor": 0.5}),
+    "fan_hot_water_max": ("fan", {"heating_pressure": -1.0,
+                                  "cooling_pressure_gain": 0.6,
+                                  "heating_water_floor": 1.0}),
 }
 
 

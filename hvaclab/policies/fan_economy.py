@@ -101,6 +101,10 @@ class FanEconomyPolicy(DeadlineBandPolicy):
         cooling_pressure_gain: Scales the inherited cooling pressure towards
             the floor. 1.0 is the identity, so it is the control for the
             cooling side.
+        heating_water_floor: Lower bound on the normalised hot-water
+            temperature while any handler is heating, so the loop is hot
+            enough to deliver heat at the reduced airflow. ``None`` leaves
+            ``pid_water``'s demand reset alone, which is the control.
     """
 
     def __init__(
@@ -109,6 +113,7 @@ class FanEconomyPolicy(DeadlineBandPolicy):
         action_spec,
         heating_pressure: float | None = -1.0,
         cooling_pressure_gain: float = 0.6,
+        heating_water_floor: float | None = None,
         **kwargs,
     ) -> None:
         super().__init__(building_meta_data, action_spec, **kwargs)
@@ -116,6 +121,9 @@ class FanEconomyPolicy(DeadlineBandPolicy):
             None if heating_pressure is None else float(heating_pressure)
         )
         self.cooling_pressure_gain = float(cooling_pressure_gain)
+        self.heating_water_floor = (
+            None if heating_water_floor is None else float(heating_water_floor)
+        )
 
     @property
     def name(self) -> str:
@@ -125,6 +133,8 @@ class FanEconomyPolicy(DeadlineBandPolicy):
         action = super().get_action(obs)
         continuous = action["continuous_action"]
         discrete = action["discrete_action"]
+
+        any_heating = False
 
         for ctrl in self.ahu_controllers:
             pressure_idx = ctrl.get("pressure_idx")
@@ -142,6 +152,7 @@ class FanEconomyPolicy(DeadlineBandPolicy):
             effort = float(continuous[ctrl["temp_idx"]])
 
             if effort > 0.0:
+                any_heating = True
                 if self.heating_pressure is not None:
                     continuous[pressure_idx] = np.float32(self.heating_pressure)
             elif effort < 0.0:
@@ -152,5 +163,26 @@ class FanEconomyPolicy(DeadlineBandPolicy):
                 continuous[pressure_idx] = np.float32(
                     np.clip(scaled, -1.0, 1.0)
                 )
+
+        # Clamping the fan in heating removes airflow, and heat delivered is
+        # airflow times the coil's temperature rise. Taking the flow away
+        # without raising the water temperature would just under-deliver.
+        #
+        # `pid_water`'s own docstring reaches the same conclusion from the
+        # other direction: "In the coldest scenarios, cool water costs MORE
+        # than hot: the coil cannot deliver, so the fan sits at full static
+        # pressure all episode moving air that is not warm enough." Its
+        # saturation term raises the loop when the air side saturates, but it
+        # leaves the fan law alone. Pairing a hot loop with a quiet fan is the
+        # combination that follows, and this is the floor that enforces it.
+        if (
+            self.heating_water_floor is not None
+            and any_heating
+            and self.water_temp_idx is not None
+        ):
+            continuous[self.water_temp_idx] = np.float32(max(
+                float(continuous[self.water_temp_idx]),
+                self.heating_water_floor,
+            ))
 
         return action

@@ -28,6 +28,12 @@ def main() -> None:
                         help="restrict to these building names")
     parser.add_argument("--weathers", nargs="*", default=None,
                         help="restrict to these weather strip names")
+    parser.add_argument("--scenarios", nargs="*", default=None,
+                        help="exact 'building/weather' pairs. Prefer this over "
+                             "--buildings/--weathers when naming a specific "
+                             "set: those two filter independently, so a "
+                             "building that also owns one of the named strips "
+                             "quietly joins the run.")
     parser.add_argument("--scenarios-dir", type=Path,
                         default=runner.SCENARIOS_DIR)
     parser.add_argument("--out", type=Path, default=None,
@@ -35,10 +41,17 @@ def main() -> None:
     args = parser.parse_args()
 
     pairs = runner.shipped_pairs(args.scenarios_dir)
-    if args.buildings:
-        pairs = [p for p in pairs if p[0] in set(args.buildings)]
-    if args.weathers:
-        pairs = [p for p in pairs if p[1] in set(args.weathers)]
+    if args.scenarios:
+        wanted = set(args.scenarios)
+        pairs = [p for p in pairs if f"{p[0]}/{p[1]}" in wanted]
+        missing = wanted - {f"{b}/{w}" for b, w in pairs}
+        if missing:
+            raise SystemExit(f"no such scenarios: {sorted(missing)}")
+    else:
+        if args.buildings:
+            pairs = [p for p in pairs if p[0] in set(args.buildings)]
+        if args.weathers:
+            pairs = [p for p in pairs if p[1] in set(args.weathers)]
     if not pairs:
         raise SystemExit("no scenarios matched")
 
