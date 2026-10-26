@@ -15,8 +15,9 @@
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 \usepackage{caption}
 
-\title{\textbf{Airflow Is the Load, Not Just the Bill}\\[2pt]
-\large A Mispriced Actuator in the Smart Buildings Challenge}
+\title{\textbf{Airflow Is the Load in Heating and the Delivery in Cooling}\\[2pt]
+\large One Asymmetry Decides Three Controller Decisions in the Smart
+Buildings Challenge}
 
 \author{%
   Nhat Trinh Ngoc Minh\\[2pt]
@@ -37,25 +38,36 @@ The Smart Buildings Challenge asks whether a single HVAC control policy can
 transfer to buildings and climates it has never seen, and poses as an open
 question whether domain-specific models or generic foundation models will
 generalize best. We report a result on the domain-specific side, and a caution
-about how it should be measured. All four reference controllers shipped with
-the challenge price fan static pressure as a cost to be paid in proportion to
-demand. In this plant that is the wrong sign: the simulator caps recirculation
-at 70\%, so three tenths of every cubic metre the fan moves is ambient air that
-must then be conditioned from the outdoor temperature. Raising static pressure
-to deliver heat therefore \emph{increases} the heating load it was raised to
-meet. Clamping static pressure to its floor whenever an air handler is heating
-reduces the leaderboard metric from $0.05496$ to $0.03682$ over the 30
-published training scenarios---a $33.0\%$ reduction, improving comfort, energy
-and carbon simultaneously, with the worst scenario falling $66\%$. On held-out
-buildings we generated ourselves the same controller gains $5.7\%$ and
-$13.4\%$. We argue the gap is the result, not a failure of it: the published
-set contains catastrophic baseline failures and the held-out sets do not, so
-the published 30 overstate what any repair of those failures is worth. The
-controller has no learned parameters, runs in pure NumPy, and is a 40-line
-change to the strongest shipped baseline. We also report five refuted
-hypotheses, including our own initial one, and a methodological finding: the
-baseline return table shipped with the starter kit predates a simulator fix
-and no longer reproduces.
+about how it should be measured.
+
+One property of the plant decides three separate controller choices, and the
+shipped reference controllers get all three wrong in the same direction. The
+air handler cannot heat---all heat comes from the VAV reheat coils---and below
+about $-6.8^{\circ}$C ambient its supply-air command is inert as well, because
+it delivers $\min(\text{mixed air}, \text{setpoint})$ and with recirculation
+capped at $70\%$ the mixed air is already below the coldest setpoint
+available. So \textbf{in heating, airflow is the load}: three tenths of every
+cubic metre the fan moves is ambient air that must then be heated, and the fan
+work is spent before the gas is spent undoing it. \textbf{In cooling the same
+airflow is the delivery.} Every decision that adds or withholds airflow
+therefore pays in one direction and costs in the other, and each needs the same
+gate: static pressure, air-handler run length, and whether to run a handler at
+all.
+
+Acting on this takes the metric from $0.05496$ to $0.02774$ over the 30
+published scenarios, a $49.5\%$ reduction, with no learned parameters and in
+pure NumPy. An earlier version of the controller measured $0.03785$ locally
+and scored $0.04932$ on the organizers' held-out leaderboard against
+$0.06404$ for the baseline, so the gain transfers at $23\%$ and the two scales
+are readable against each other.
+
+We also report eight refuted hypotheses, including our own initial one and one
+conclusion we drew and then had to withdraw: after six failed attempts at the
+comfort term we claimed the shipped gains sat near a local optimum. They do
+not. Every one of those attempts pushed the zone loop \emph{harder}, and the
+loop was already oscillating; the fix is a five-times softer gain with an
+integral term, which no single-knob ablation can find because neither half
+works alone.
 \end{abstract}
 
 \section{Introduction}
@@ -170,8 +182,9 @@ $45^\circ$C ambient, extra flow again imports extra load.
 
 \section{Controller}
 
-Our policy is the shipped \texttt{pid\_water} controller with two changes and no
-learned parameters.
+Our policy is the shipped \texttt{pid\_water} controller with four changes and
+no learned parameters. Three of the four are the same asymmetry applied to a
+different actuator.
 
 \paragraph{A flat band.} \texttt{pid\_water} widens its band to an eco setback
 outside comfort hours. We hold the comfort band around the clock. This is not
@@ -193,6 +206,43 @@ mild climate from overshoot and starves a cold one, where the valve is the only
 heat source and the air reaching it is already $20$\,K below the zone. We
 saturate the valve at $0.5$\,K.
 
+\paragraph{A minimum run length for cooling runs.} The shipped loop idles a
+handler the instant its \emph{aggregate} zone error clears and restarts it at
+the next excursion. Because the zone loop oscillates (below), those excursions
+arrive every few steps: every handler switches on or off 50 to 107 times a
+day. Each restart is paid for twice---the fan spins up against a cold duct, and
+the zones drift while it is off, so the restart is larger than the excursion
+that triggered it. We hold a run that was started to cool at its last commands
+for 288 steps.
+
+Heating runs are not held, and that is the asymmetry again: a handler that
+cannot heat has no reason to stay on, and holding one in the cold is a
+continuous flow of $274$\,K air for nothing. We also tested forcing every
+handler on through the comfort window---what a real VAV plant does, supplying
+cool air steadily while each box decides how much to take. Gated on the zones'
+own demand it is worth $-44\%$ on \texttt{phoenix\_4} and exactly $0.0\%$ on
+\texttt{fairbanks\_1}, because the gate never fires there. Ungated it costs
+$+54\%$ in Fairbanks. But combined with the hold it is worse than the hold
+alone ($0.0506$ against $0.0385$): both mechanisms exist to stop a handler
+being cycled off, so together they interfere. We kept the hold.
+
+\paragraph{Per-zone PI against the band centre.} The shipped zone law is
+\begin{equation}
+\texttt{damper} = \min\!\left(1, \frac{|\mathrm{deadband\_error}|}{2\,\mathrm{K}}\right),
+\end{equation}
+proportional only, and aimed at the band \emph{edge}: \texttt{deadband\_error}
+is zero everywhere inside the band, so the loop has no target in there to
+hold. It pushes until the zone crosses the edge, stops, and the zone drifts
+back out the other side. Zones average \emph{inside} the $21$--$24^{\circ}$C
+band and yet sit outside it $57$--$61\%$ of working hours, swinging $2$--$4$\,K
+every few steps \cite{probezt}.
+
+We give each zone its own PI loop on $e = T - \text{centre}$, with
+$k_p=0.1$, $k_i=0.005$ per five-minute step and conditional integration, from
+an hour before the comfort window until it closes. One signal drives both
+actuators: the damper follows $|u|$, because air is needed either to cool or to
+carry the reheat coil's output, and only the valve follows the sign.
+
 \section{Results}
 
 All runs are full $8{,}640$-step episodes. The simulator is deterministic---we
@@ -209,19 +259,31 @@ re-run with the current simulator.}
 policy & metric & worst scenario & comfort & energy & carbon \\
 \midrule
 \texttt{pid\_water} (strongest baseline) & $0.05496$ & $0.21392$ & $0.03489$ & $0.01150$ & $0.00857$ \\
-\textbf{ours} & $\mathbf{0.03682}$ & $\mathbf{0.07245}$ & $0.02694$ & $0.00572$ & $0.00416$ \\
+band + fan clamp only & $0.03785$ & $0.07262$ & $0.02655$ & $0.00678$ & $0.00452$ \\
+\textbf{+ zone PI + cooling hold} & $\mathbf{0.02774}$ & $\mathbf{0.07685}$ & $0.01576$ & $0.00706$ & $0.00492$ \\
 \midrule
-change & $-33.0\%$ & $-66.1\%$ & $-22.8\%$ & $-50.3\%$ & $-51.5\%$ \\
+change & $-49.5\%$ & $-64.1\%$ & $-54.8\%$ & $-38.6\%$ & $-42.6\%$ \\
 \bottomrule
 \end{tabular}
 \label{tab:main}
 \end{table}
 
-\textbf{All three terms improve at once.} That is the signature of a mispriced
-actuator rather than a trade: less static pressure is less airflow, which is
-less ambient air imported, which is less load, so the coils keep up where
-before they could not. Comfort improves \emph{because} the energy was cut, not
-despite it.
+\textbf{The fan clamp improves all three terms at once}, which is the
+signature of a mispriced actuator rather than a trade: less static pressure is
+less airflow, which is less ambient air imported, which is less load, so the
+coils keep up where before they could not. Comfort improves \emph{because} the
+energy was cut, not despite it.
+
+The zone PI and the hold then take comfort down by a further $41\%$ for a
+slight rise in energy, which is the trade the $35{:}1$ price ratio says to
+make.
+
+\textbf{The remaining tail is now entirely one climate.} The four worst
+scenarios are \texttt{fairbanks\_1}, \texttt{fairbanks\_7},
+\texttt{fairbanks\_8} and \texttt{fairbanks\_2}, at $0.077$, $0.067$, $0.061$
+and $0.060$. That is the design showing through rather than a surprise: both
+of the later changes are gated on cooling, so neither fires in the cold, and
+what is left is exactly the climate they do not touch.
 
 The gain is concentrated in the tail, which is what the metric rewards. Our
 policy is better on 19 of 30 scenarios; summed over scenarios it improves
@@ -235,8 +297,7 @@ which is what a mechanism acting through the ventilation floor predicts.
 \begin{table}[h]
 \centering
 \caption{Ablation, mean over \texttt{fairbanks\_1}, \texttt{singapore\_6} and
-\texttt{phoenix\_4}. The flat band and the pressure law are separable, and the
-pressure law carries the result.}
+\texttt{phoenix\_4}. Each row adds one change to the row above.}
 \begin{tabular}{lcl}
 \toprule
  & metric & \\
@@ -245,8 +306,14 @@ pressure law carries the result.}
 \quad + flat band                       & $0.12321$ & band alone \\
 \quad + cooling clamp only              & $0.11315$ & \\
 \quad + heating clamp only              & $0.05226$ & \textbf{the single biggest term} \\
-\quad + both clamps                     & $0.04967$ & \\
-\quad + reheat saturation at $0.5$\,K   & $\mathbf{0.04730}$ & final \\
+\quad + reheat saturation at $0.5$\,K   & $0.05034$ & \\
+\quad + per-zone PI                     & $0.04657$ & \\
+\quad + cooling-run hold, 288 steps     & $\mathbf{0.03846}$ & final \\
+\midrule
+\multicolumn{3}{l}{\emph{tested and dropped}} \\
+\quad PI, proportional only ($k_i=0$)   & $0.05304$ & worse than no PI at all \\
+\quad PI + forced-on handlers           & $0.04248$ & \\
+\quad PI + forced-on + hold             & $0.05061$ & the two interfere \\
 \bottomrule
 \end{tabular}
 \label{tab:ablation}
@@ -268,17 +335,32 @@ evaluation set.
 \centering
 \caption{The same controller on three sets. The gain is positive everywhere
 and much smaller off the published scenarios.}
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
- & \texttt{pid\_water} & ours & change \\
+ & \texttt{pid\_water} & fan clamp & full & change \\
 \midrule
-published (30 scenarios)      & $0.05496$ & $0.03682$ & $-33.0\%$ \\
-dev (20, unseen buildings)    & $0.04630$ & $0.04367$ & $-5.7\%$ \\
-test (8, unseen also climate) & $0.11253$ & $0.09748$ & $-13.4\%$ \\
+published (30 scenarios)         & $0.05496$ & $0.03785$ & $0.02774$ & $-49.5\%$ \\
+dev (20, unseen buildings)       & $0.04630$ & $0.04336$ & --- & --- \\
+test (8, unseen also climate)    & $0.11253$ & $0.09781$ & $0.08937$ & $-20.6\%$ \\
+\midrule
+\textbf{held-out leaderboard}    & $\mathbf{0.06404}$ & $\mathbf{0.04932}$ & --- & $\mathbf{-23.0\%}$ \\
 \bottomrule
 \end{tabular}
 \label{tab:holdout}
 \end{table}
+
+The last row is the organizers' own held-out set, obtained by submitting the
+unmodified \texttt{pid\_water} baseline alongside our entry. A baseline whose
+local value is known exactly turns the leaderboard into a ruler: it scores
+$1.17\times$ \emph{higher} there than on the published scenarios, so the
+evaluation set is slightly harder rather than easier, and the $23\%$ gain is
+measured on buildings and weather we never saw.
+
+Our \texttt{test} split is the weakest of the three estimates and we would not
+lean on it: it is entirely \texttt{minneapolis}, a cold station, and both of
+the later changes are gated on cooling. It measures the one climate they do
+not address, which makes $-20.6\%$ a lower bound rather than a representative
+figure.
 
 \textbf{We think the gap is the finding, not a flaw in it.} The worst-case
 column explains it: \texttt{pid\_water}'s worst published scenario scores
@@ -347,24 +429,38 @@ more cold air than the extra flow delivers.
 \paragraph{Capping the hot-water pump.} Also electricity, also pinned at
 maximum by the baseline, and also worse when capped ($0.051$ against $0.050$).
 
-\paragraph{Everything aimed at the comfort term.} After the fan clamp, comfort
-is $70$--$75\%$ of what is left on all three sets, so it should be where the
-remaining score is. It is not. Against a reference of $0.0503$ on the three
-hard scenarios: reading each zone's band from its own setpoint sensors
-$0.0548$; a stiffer loop, $k_p$ $0.5\!\to\!1.0$, $0.0794$; dampers opening at
-$1$\,K instead of $2$\,K $0.0897$, and at $0.5$\,K $0.1117$; driving the
-air-handler loop from its worst zone rather than the mean $0.0970$; a
-per-zone damper gate that withholds airflow from a zone the supply air cannot
-help $0.0626$.
+\paragraph{Everything aimed at the comfort term, and a conclusion we withdrew.}
+After the fan clamp, comfort is $70$--$75\%$ of what is left on all three sets.
+Against a reference of $0.0503$ on the three hard scenarios we measured:
+reading each zone's band from its own setpoint sensors $0.0548$; a stiffer
+loop, $k_p$ $0.5\!\to\!1.0$, $0.0794$; dampers opening at $1$\,K instead of
+$2$\,K $0.0897$, and at $0.5$\,K $0.1117$; driving the air-handler loop from
+its worst zone rather than the mean $0.0970$; a per-zone damper gate
+withholding airflow from a zone the supply air cannot help $0.0626$; and a
+margin aiming inside the band rather than at its edge, $0.236$.
 
-Six attempts, all worse, and the shape of the failure is consistent. Four of
-them---margin, $k_p$, damper gain, worst-zone---amount to driving harder, and
-each loses by oscillating across the band it was meant to hold. \textbf{The
-shipped gains sit near a local optimum for this control structure.}
+Six attempts, all worse, and we concluded that the shipped gains sat near a
+local optimum and the comfort term was not reachable by retuning.
+\textbf{That conclusion was wrong}, and it is worth reporting why, because the
+error is structural rather than careless.
 
-Two of these also answer questions the starter kit leaves open: it describes
-both the sensor band and the worst-zone loop in its own documentation, and
-ships with both switched off. Our measurements say it was right to.
+Four of the six---margin, $k_p$, damper gain, worst-zone---are pushes in the
+direction that \emph{causes} the oscillation, applied to a loop that was
+already oscillating. The correct direction was five times softer. But a softer
+proportional gain alone is also worse: measured, $k_p=0.1$ with $k_i=0$ scores
+$0.0530$ against $0.0503$ for leaving the loop alone, because soft P trades
+the swing for a standing offset. The gain and the integral only work together,
+and aiming at the band centre rather than the edge is required for the
+integral to have a target at all.
+
+\textbf{A one-factor-at-a-time ablation cannot find a change whose two halves
+are each harmful alone.} That is the methodological lesson, and six consistent
+negative results made it look like evidence about the problem when it was
+evidence about the search.
+
+Two of the six do answer questions the starter kit leaves open: it describes
+both the sensor band and the worst-zone loop in its documentation and ships
+with both switched off. Our measurements say it was right to.
 
 \section{A note on the shipped baseline table}
 
@@ -393,21 +489,19 @@ is the same on every set we measured because it acts through a
 constraint---the $70\%$ recirculation cap---that is a property of the plant
 rather than of any building.
 
-There is a sharper version of the claim, and the negative results are what
-support it. Of nine changes we measured, one moved the score and eight did
-not. The one that worked is a \emph{pricing} correction---the controller was
-buying the most expensive fuel in order to import the load it was trying to
-remove. The eight that failed were all attempts to make the controller
-\emph{track better}: tighter targets, stiffer gains, faster dampers, a
-different zone to aim at. Every one of them lost.
+The headroom here divides into two kinds, and they are found in different
+ways. One is \emph{pricing}: the controller buying the most expensive fuel in
+order to import the load it was trying to remove. That one is visible by
+reading the plant and the reward, and it is what the heating-side fan clamp
+corrects. The other is \emph{tracking}: a zone loop oscillating across the band
+it is meant to hold, for $57$--$61\%$ of working hours. That one is visible
+only by logging what the controller actually does, step by step, which is how
+it was found \cite{probezt} and not how we were looking.
 
-\textbf{So the headroom over the reference controllers in this benchmark is
-not in control quality. They are competent controllers that are priced
-wrong.} That is worth saying because it inverts where effort naturally goes.
-A policy-learning method pointed at this environment will spend its capacity
-learning to track, which is the part already near its local optimum, and the
-part that actually pays is a property of the plant and the reward that is
-visible by reading them.
+We spent six experiments concluding the second kind did not exist, on the
+strength of six failures that were all the same mistake. The honest summary is
+that reading the reward told us where the money was, and it was not sufficient
+to tell us how to collect it.
 
 Its \emph{magnitude}, though, is a property of the evaluation set, and that is
 the part we would most want other entrants to take from this. The difference
@@ -458,6 +552,14 @@ Real-World Optimization at Scale.
 Smart Buildings 2026 Organizers.
 \newblock Smart Buildings Competition Starter Kit.
 \newblock \url{https://github.com/smart-buildings-2026/starter-kit}, 2026.
+
+\bibitem{probezt}
+Smart Buildings: per-zone PI control and AHU cooling hold.
+\newblock Public competition notebook, Kaggle Code tab, 2026.
+\newblock The per-zone oscillation diagnosis, the PI gains and the cooling-run
+hold are from this notebook; our implementations are independent. It also
+reports the minimum-fan-pressure result we arrived at separately, with the
+same explanation, which we take as mutual confirmation of the mechanism.
 \end{thebibliography}
 
 \end{document}
