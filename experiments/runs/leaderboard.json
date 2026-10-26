@@ -1,0 +1,31 @@
+{
+  "note": "Kaggle public leaderboard scores, 2026-10-26. The public leaderboard scores a rotating subset of the held-out (building, weather) pairs; the private leaderboard uses the complete set.",
+  "submissions": {
+    "pid_water": {
+      "public_score": 0.06404,
+      "local_shipped30": 0.05496,
+      "local_dev": 0.04630,
+      "local_test": 0.11253,
+      "purpose": "calibration: a baseline whose local value is known exactly, so the leaderboard can be read as a ruler"
+    },
+    "x_heatonly": {
+      "public_score": 0.04932,
+      "local_shipped30": 0.03785,
+      "local_dev": 0.04336,
+      "local_test": 0.09781,
+      "purpose": "this entry"
+    }
+  },
+  "derived": {
+    "improvement_leaderboard": 0.2299,
+    "improvement_local_shipped30": 0.3112,
+    "improvement_local_dev": 0.0635,
+    "improvement_local_test": 0.1309,
+    "scale_ratio_pid_water": 1.165,
+    "comment": "pid_water scores 1.17x HIGHER on the held-out set than on the published scenarios, so the evaluation set is slightly harder, not easier. The improvement transfers at 23%."
+  },
+  "leaderboard_context": {
+    "observed_top_11_range": [0.00521, 0.00636],
+    "comment": "Our 0.04932 is 9.5x the top score. Our energy+carbon alone is 0.0113 locally, so even with zero comfort penalty we could not reach 0.005 by this route. Reaching the top requires both near-perfect tracking and roughly a third of our energy, which is not a gain available from retuning this control structure."
+  }
+}
