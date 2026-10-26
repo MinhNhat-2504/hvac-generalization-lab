@@ -279,11 +279,27 @@ slight rise in energy, which is the trade the $35{:}1$ price ratio says to
 make.
 
 \textbf{The remaining tail is now entirely one climate.} The four worst
-scenarios are \texttt{fairbanks\_1}, \texttt{fairbanks\_7},
+published scenarios are \texttt{fairbanks\_1}, \texttt{fairbanks\_7},
 \texttt{fairbanks\_8} and \texttt{fairbanks\_2}, at $0.077$, $0.067$, $0.061$
-and $0.060$. That is the design showing through rather than a surprise: both
-of the later changes are gated on cooling, so neither fires in the cold, and
-what is left is exactly the climate they do not touch.
+and $0.060$. The held-out \texttt{dev} split says the same thing across
+independent buildings, by station:
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+ & atlanta & phoenix & singapore & denver & fairbanks \\
+\midrule
+\texttt{dev} score & $0.0137$ & $0.0137$ & $0.0152$ & $\mathbf{0.0655}$ & $\mathbf{0.0644}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The two cold stations are four to five times the other three. That is the
+design showing through rather than a surprise: both of the later changes are
+gated on cooling, so neither fires in the cold, and what remains is exactly
+the climate they do not touch. It is also where the asymmetry says the problem
+is hardest---in heating the one actuator that moves air is working against the
+load it is trying to serve, so there is no cheap direction to push.
 
 The gain is concentrated in the tail, which is what the metric rewards. Our
 policy is better on 19 of 30 scenarios; summed over scenarios it improves
@@ -340,7 +356,7 @@ and much smaller off the published scenarios.}
  & \texttt{pid\_water} & fan clamp & full & change \\
 \midrule
 published (30 scenarios)         & $0.05496$ & $0.03785$ & $0.02774$ & $-49.5\%$ \\
-dev (20, unseen buildings)       & $0.04630$ & $0.04336$ & --- & --- \\
+dev (20, unseen buildings)       & $0.04630$ & $0.04336$ & $0.03449$ & $-25.5\%$ \\
 test (8, unseen also climate)    & $0.11253$ & $0.09781$ & $0.08937$ & $-20.6\%$ \\
 \midrule
 \textbf{held-out leaderboard}    & $\mathbf{0.06404}$ & $\mathbf{0.04932}$ & --- & $\mathbf{-23.0\%}$ \\

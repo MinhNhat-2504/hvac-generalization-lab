@@ -103,21 +103,43 @@ NOTEBOOK_CELL = '''# NeurIPS 2026 Smart Buildings Competition -- submission
 #
 # {title}
 #
-# The controller is `pid_water` with three changes, none of them learned:
+# The controller is the organizers' `pid_water` (Apache-2.0) with four
+# changes, none of them learned and none fitted to a building.
+#
+# THE ORGANISING FACT. One asymmetry decides three of the four. The air
+# handler cannot heat -- all heat comes from the VAV reheat coils -- and below
+# about -6.8 C ambient its supply-air command is inert too, since it delivers
+# min(mixed_air, setpoint) and with recirculation capped at 0.70 the mixed air
+# is already below the coldest setpoint available. So in heating, airflow is
+# the LOAD: three tenths of every cubic metre the fan moves is ambient air
+# that must then be heated. In cooling the same airflow is the DELIVERY.
 #
 #   1. The comfort band is held around the clock instead of setting back
 #      overnight. A building held in band starts the morning with no deviation
 #      to recover, and the recovery costs more than the setback saves.
 #
-#   2. Static pressure is clamped to its floor whenever an air handler is
-#      heating. The handler cannot heat -- all heat comes from the VAV reheat
-#      coils -- and with recirculation capped at 0.70 every extra cubic metre
-#      the fan moves is 0.3 cubic metres of ambient air that must then be
-#      heated. In heating, airflow is the load, not just the bill.{cooling_note}
+#   2. Static pressure is clamped to its floor whenever a handler is heating.
+#      Cooling is left exactly as `pid` wrote it.{cooling_note}
 #
-#   3. The reheat valve saturates at 0.5 K of shortfall instead of 2.0 K.
-#      Throttling it protects a mild climate from overshoot and starves a cold
-#      one, where that valve is the only heat source in the building.
+#   3. Per-zone PI against the band CENTRE (Kp 0.1, Ki 0.005 per step,
+#      conditional integration), active from an hour before the comfort window
+#      until it closes. The shipped zone law is proportional only and aims at
+#      the band EDGE -- deadband_error is zero inside the band, so there is no
+#      target in there to hold -- which leaves zones oscillating across it.
+#      The damper follows |u| and only the valve follows the sign, because air
+#      is needed either to cool or to carry the reheat coil's output.
+#      The reheat valve also saturates at 0.5 K instead of 2.0 K.
+#
+#   4. A minimum run length of 288 steps for runs started to COOL. The shipped
+#      loop idles a handler the instant its aggregate zone error clears and
+#      restarts at the next excursion. Heating runs are not held: a handler
+#      that cannot heat has no reason to stay on.
+#
+# Credit: the per-zone oscillation diagnosis, the PI gains and the cooling-run
+# hold are from the public notebook "Smart Buildings: per-zone PI control and
+# AHU cooling hold" on this competition's Code tab. The implementations here
+# are independent, as is the heating-side fan clamp, which that notebook
+# reports separately with the same explanation.
 #
 # Local measurement, full 8640-step episodes, leaderboard metric, lower better:
 #
