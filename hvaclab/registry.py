@@ -18,6 +18,8 @@ _OURS: dict[str, tuple[str, str]] = {
     "band": ("hvaclab.policies.deadline_band", "DeadlineBandPolicy"),
     "fan": ("hvaclab.policies.fan_economy", "FanEconomyPolicy"),
     "zone": ("hvaclab.policies.zone_aware", "ZoneAwarePolicy"),
+    "zonepi": ("hvaclab.policies.zone_pi", "ZonePIPolicy"),
+    "hold": ("hvaclab.policies.cooling_hold", "CoolingHoldPolicy"),
 }
 
 # Parameter variants, for ablation. Each entry is (policy key, kwargs).
@@ -241,6 +243,50 @@ _C: dict[str, tuple[str, dict[str, Any]]] = {
                              "use_sensor_band": True}),
 }
 _W.update(_C)
+
+# ---------------------------------------------------------------------------
+# Per-zone PI. This repository's earlier comfort conclusion was wrong.
+#
+# We tested a stiffer loop, faster dampers and a tighter target, measured all
+# three as worse, and concluded the gains sat near a local optimum. All three
+# were pushes in the direction that CAUSES the oscillation. The public "Probe
+# ZT Best" notebook measured what was actually happening: zones averaged
+# inside the 21-24 C band yet sat outside it 57-61% of working hours, swinging
+# 2-4 K every 5-15 minutes.
+#
+# The fix is a much softer proportional gain AND an integral term, aimed at
+# the band centre rather than its edge. Neither half works alone -- soft P
+# trades the swing for a standing offset, and an integral on a deadband error
+# has no target inside the band to integrate towards. An ablation that moves
+# one knob at a time cannot find it.
+_PI: dict[str, Any] = {**_BEST}
+_P: dict[str, tuple[str, dict[str, Any]]] = {
+    "p_ctrl": ("zonepi", {**_PI, "enabled": False}),
+    "p_pi": ("zonepi", {**_PI, "kp": 0.1, "ki": 0.005}),
+    # Softer and stiffer either side, to check the published gains are not a
+    # knife edge on a different controller.
+    "p_pi_soft": ("zonepi", {**_PI, "kp": 0.05, "ki": 0.0025}),
+    "p_pi_stiff": ("zonepi", {**_PI, "kp": 0.2, "ki": 0.01}),
+    # Proportional only at the soft gain, to confirm the integral is load
+    # bearing rather than the softness doing all the work.
+    "p_p_only": ("zonepi", {**_PI, "kp": 0.1, "ki": 0.0}),
+}
+_W.update(_P)
+
+# ---------------------------------------------------------------------------
+# Cooling-run hold. The shipped loop idles a handler the instant its zones are
+# back in band and restarts it at the next excursion, which with an
+# oscillating zone loop is 50-107 switches per handler per day. Holding only
+# the runs started for cooling keeps the hot-climate gain without stretching
+# heating bursts, which a handler that cannot heat has no reason to stretch.
+_PIBEST: dict[str, Any] = {**_BEST, "kp": 0.1, "ki": 0.005}
+_H: dict[str, tuple[str, dict[str, Any]]] = {
+    "h_ctrl": ("hold", {**_PIBEST, "hold_steps": 0}),
+    "h_6": ("hold", {**_PIBEST, "hold_steps": 6}),
+    "h_96": ("hold", {**_PIBEST, "hold_steps": 96}),
+    "h_288": ("hold", {**_PIBEST, "hold_steps": 288}),
+}
+_W.update(_H)
 
 _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {
     **_SETBACK_ABLATION,
