@@ -270,6 +270,17 @@ _P: dict[str, tuple[str, dict[str, Any]]] = {
     # Proportional only at the soft gain, to confirm the integral is load
     # bearing rather than the softness doing all the work.
     "p_p_only": ("zonepi", {**_PI, "kp": 0.1, "ki": 0.0}),
+    # Per-zone PI only acts through dampers, and a damper is a share of a flow
+    # that has to exist. The inherited loop idles a handler whenever its
+    # AGGREGATE zone error reaches zero, so the zone loops can only act in the
+    # windows that aggregate happens to leave open. Forcing the handlers on at
+    # a fixed moderate supply temperature and a low static pressure is what a
+    # real VAV plant does, and it is what the per-zone loop needs underneath
+    # it.
+    "p_forced": ("zonepi", {**_PI, "kp": 0.1, "ki": 0.005,
+                            "force_ahu_on": True}),
+    "p_forced_cold": ("zonepi", {**_PI, "kp": 0.1, "ki": 0.005,
+                                 "force_ahu_on": True, "forced_sat": -0.9}),
 }
 _W.update(_P)
 
@@ -286,6 +297,17 @@ _H: dict[str, tuple[str, dict[str, Any]]] = {
     "h_96": ("hold", {**_PIBEST, "hold_steps": 96}),
     "h_288": ("hold", {**_PIBEST, "hold_steps": 288}),
 }
+
+# All three pieces together. Forcing the handlers on is gated on the zones
+# asking to be cooled, which keeps the hot-climate gain (phoenix_4 -44%) and
+# removes the cold-climate loss entirely (fairbanks_1 unchanged, because the
+# gate never fires there).
+_FORCED: dict[str, Any] = {**_PIBEST, "force_ahu_on": True}
+_H.update({
+    "all_nohold": ("hold", {**_FORCED, "hold_steps": 0}),
+    "all_96": ("hold", {**_FORCED, "hold_steps": 96}),
+    "all_288": ("hold", {**_FORCED, "hold_steps": 288}),
+})
 _W.update(_H)
 
 _VARIANTS: dict[str, tuple[str, dict[str, Any]]] = {

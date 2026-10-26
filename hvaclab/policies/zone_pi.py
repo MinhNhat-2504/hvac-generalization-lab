@@ -90,6 +90,9 @@ class ZonePIPolicy(FanEconomyPolicy):
         integral_limit: float = 200.0,
         prestart_hours: float = 1.0,
         enabled: bool = True,
+        force_ahu_on: bool = False,
+        forced_sat: float = -0.7,
+        forced_pressure: float = -0.6,
         **kwargs,
     ) -> None:
         super().__init__(building_meta_data, action_spec, **kwargs)
@@ -98,8 +101,12 @@ class ZonePIPolicy(FanEconomyPolicy):
         self.zone_integral_limit = float(integral_limit)
         self.prestart_hours = float(prestart_hours)
         self.zone_pi_enabled = bool(enabled)
+        self.force_ahu_on = bool(force_ahu_on)
+        self.forced_sat = float(forced_sat)
+        self.forced_pressure = float(forced_pressure)
 
         self._zone_integral: dict[str, float] = {}
+        self._zone_u: dict[str, float] = {}
         self._pi_active = False
 
     @property
@@ -157,6 +164,9 @@ class ZonePIPolicy(FanEconomyPolicy):
             u = float(np.clip(
                 self.zone_kp * error + self.zone_ki * integral, -1.0, 1.0
             ))
+            # Recorded so `get_action` can tell which direction this handler's
+            # zones are asking for, without recomputing the loop.
+            self._zone_u[vav_id] = u
 
             # The air is needed in both directions: to cool, and to carry the
             # reheat coil's output. So the damper follows the magnitude and
@@ -176,4 +186,46 @@ class ZonePIPolicy(FanEconomyPolicy):
         self._pi_active = self._in_pi_window(obs)
         if not self._pi_active:
             self._zone_integral.clear()
-        return super().get_action(obs)
+
+        action = super().get_action(obs)
+        if not (self.force_ahu_on and self._pi_active):
+            return action
+
+        # Hand the air handler a fixed job and let the zones do the control.
+        #
+        # Without this the per-zone loop is writing damper and valve positions
+        # into a building whose handlers the inherited loop has idled, because
+        # that loop stops as soon as its *aggregate* zone error reaches zero.
+        # A damper is a share of a flow that is not there. So the zone loop can
+        # only act in the windows the aggregate happens to leave open, which is
+        # most of why per-zone PI alone recovered 7.5% here against the much
+        # larger gain reported for it elsewhere.
+        #
+        # Running every handler at a fixed, moderate supply temperature and a
+        # low static pressure is what a real VAV system does: the plant
+        # supplies cool air at a steady temperature and each box decides how
+        # much of it to take and how much to temper. It also keeps the fan near
+        # its floor, which is where the airflow-is-the-load argument wants it.
+        # Only where the zones are asking to be cooled.
+        #
+        # Forcing every handler on helps hot climates and badly hurts cold
+        # ones: phoenix_4 improved 38% and fairbanks_1 lost 54%. In deep cold
+        # the forced supply temperature is inert anyway -- the handler
+        # delivers min(mixed_air, setpoint) and the mixed air is already below
+        # the coldest setpoint it can take -- so the only thing forcing it on
+        # achieves is a continuous flow of 274 K air, which is precisely the
+        # load the fan clamp exists to avoid. The same asymmetry runs through
+        # the cooling-run hold.
+        continuous = action["continuous_action"]
+        discrete = action["discrete_action"]
+        for ctrl in self.ahu_controllers:
+            if not ctrl["zone_obs_indices"]:
+                continue
+            demands = [self._zone_u.get(v, 0.0) for v, _, _ in ctrl["zones"]]
+            if not demands or float(np.mean(demands)) <= 0.0:
+                continue  # net heating: leave this handler to the loop
+            discrete[ctrl["run_discrete_idx"]] = 1
+            continuous[ctrl["temp_idx"]] = np.float32(self.forced_sat)
+            if ctrl.get("pressure_idx") is not None:
+                continuous[ctrl["pressure_idx"]] = np.float32(self.forced_pressure)
+        return action
