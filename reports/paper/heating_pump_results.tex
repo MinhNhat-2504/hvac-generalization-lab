@@ -1,0 +1,15 @@
+\paragraph{Automatically recorded closed-loop results.}
+Status: \texttt{complete}; stage: \texttt{finished}.
+All entries below require complete 8,640-step episodes on matching scenarios.
+\begin{center}\small
+\begin{tabular}{llrrrr}\toprule
+Cohort & Variant & $n$ & e\_sync & Candidate & Change \\\midrule
+train screen & \texttt{v\_pump\_warm} & 3 & 0.03207875 & 0.03203897 & -0.12\% \\
+train screen & \texttt{v\_pump\_heat} & 3 & 0.03207875 & 0.03203897 & -0.12\% \\
+dev screen & \texttt{v\_pump\_warm} & 4 & 0.02052920 & 0.02062192 & +0.45\% \\
+dev screen & \texttt{v\_pump\_heat} & 4 & 0.02052920 & 0.02062192 & +0.45\% \\
+\bottomrule\end{tabular}\end{center}
+The training and dev screens are subsets of their respective full cohorts, not independent repetitions.
+Completed new rollouts: 15. No candidate replaces Version 4 automatically.
+The unchanged-pump full-episode control score is $0.01412923$; exact-reproduction gate: passed.
+Experiment decision: all candidate dev gates failed; no submission change.

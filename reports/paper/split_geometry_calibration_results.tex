@@ -1,0 +1,15 @@
+\paragraph{Automatically recorded closed-loop results.}
+Status: \texttt{complete}; stage: \texttt{finished}.
+All entries below require complete 8,640-step episodes on matching scenarios.
+\begin{center}\small
+\begin{tabular}{llrrrr}\toprule
+Cohort & Variant & $n$ & V6 & Candidate & Change \\\midrule
+full dev & \texttt{geo7\_soft\_i} & 20 & 0.01604957 & 0.01605772 & +0.05\% \\
+full dev & \texttt{geo7\_strong\_i} & 20 & 0.01604957 & 0.01603589 & -0.09\% \\
+full dev & \texttt{geo7\_soft\_p} & 20 & 0.01604957 & 0.01613853 & +0.55\% \\
+full training & \texttt{geo7\_strong\_i} & 30 & 0.01407835 & 0.01422959 & +1.07\% \\
+\bottomrule\end{tabular}\end{center}
+These are complete matched cohorts. Dev is repeatedly used model-selection data, not untouched validation. Individual regressions are reported without a hard cutoff.
+Completed new rollouts: 91. V6 remains the latest submitted candidate; organizer improvement is not established.
+The unchanged-V6 full-episode control score is $0.01543014$; exact-reproduction gate: passed.
+Experiment decision: no split rule beat V6, V5 and V4 on both full means; retain existing submissions.

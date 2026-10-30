@@ -1,0 +1,22 @@
+\paragraph{Automatically recorded closed-loop results.}
+Status: \texttt{complete}; stage: \texttt{finished}.
+All entries below require complete 8,640-step episodes on matching scenarios.
+\begin{center}\small
+\begin{tabular}{llrrrr}\toprule
+Cohort & Variant & $n$ & e\_sync & Candidate & Change \\\midrule
+full dev & \texttt{pi\_cal\_slow\_i} & 20 & 0.01668440 & 0.01793284 & +7.48\% \\
+full dev & \texttt{pi\_cal\_fast\_i} & 20 & 0.01668440 & 0.01656292 & -0.73\% \\
+full dev & \texttt{pi\_cal\_soft\_p} & 20 & 0.01668440 & 0.01707339 & +2.33\% \\
+full dev & \texttt{pi\_cal\_firm\_p} & 20 & 0.01668440 & 0.01636229 & -1.93\% \\
+full dev & \texttt{pi\_cal\_soft\_slow} & 20 & 0.01668440 & 0.01939039 & +16.22\% \\
+full dev & \texttt{pi\_cal\_soft\_fast} & 20 & 0.01668440 & 0.01669641 & +0.07\% \\
+full dev & \texttt{pi\_cal\_firm\_slow} & 20 & 0.01668440 & 0.01661863 & -0.39\% \\
+full dev & \texttt{pi\_cal\_firm\_fast} & 20 & 0.01668440 & 0.01670230 & +0.11\% \\
+full training & \texttt{pi\_cal\_fast\_i} & 30 & 0.01445394 & 0.01502695 & +3.96\% \\
+full training & \texttt{pi\_cal\_firm\_p} & 30 & 0.01445394 & 0.01469519 & +1.67\% \\
+full training & \texttt{pi\_cal\_firm\_slow} & 30 & 0.01445394 & 0.01459717 & +0.99\% \\
+\bottomrule\end{tabular}\end{center}
+These are complete matched cohorts. Dev is repeatedly used model-selection data, not untouched validation. Individual regressions are reported without a hard cutoff.
+Completed new rollouts: 251. No candidate replaces Version 4 automatically.
+The unchanged-PI full-episode control score is $0.01620892$; exact-reproduction gate: passed.
+Experiment decision: no tested PI neighbor improved both full means; keep V4.

@@ -1,5 +1,11 @@
 # Kế hoạch giành giải nhất cả hai hạng mục
 
+> Cập nhật 27/10/2026: đây là kế hoạch ban đầu; nhiều giả thuyết bên dưới đã
+> được đo và bác bỏ. Xem [audit source, paper và lịch sử thử nghiệm](SOURCE_PAPER_AUDIT.md)
+> trước khi chọn thử nghiệm mới. Bản đang nộp là `e_sync`; kết quả mới chỉ có
+> trên tập chọn. RLS/MPC/CMA-ES vẫn là hướng dự kiến, chưa có implementation
+> trong controller hiện tại.
+
 > Tài liệu này viết bằng tiếng Việt vì là ghi chú làm việc nội bộ.
 > `README.md` giữ tiếng Anh vì đó là mặt tiền repo cho ban giám khảo đọc.
 

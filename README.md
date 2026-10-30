@@ -18,6 +18,44 @@ r_t   = 0.6 * comfort  -  0.2 * energy_cost  -  0.2 * carbon      (all penalties
 
 ## The finding this entry is built on
 
+Update, 2026-10-29: V4/e_sync remains the submitted reference (public score
+**0.01984**). The 251-episode scalar PI study found no candidate improving
+both complete local cohort means. The next bounded study tests zone gains
+scaled by participant-visible room area; see the
+[geometry PI protocol](reports/GEOMETRY_CALIBRATION_PROTOCOL.md) and
+[live results](reports/GEOMETRY_CALIBRATION_REVIEW.md).
+Paper additions preserve the earlier numerical results.
+
+Follow-up: V5 (`geo_pi_sqrt`) passed full local training/dev checks (mean
+reductions 2.05%/3.55% versus V4), passed standalone parity and was submitted;
+its Kaggle score is pending. The prospective
+[V6 refinement](reports/GEOMETRY_REFINEMENT_PROTOCOL.md) tests three geometry
+exponents and requires both full cohort means to beat **V5 and V4** before
+packaging. See its [results](reports/GEOMETRY_REFINEMENT_REVIEW.md).
+
+Organizer feedback, 2026-10-30: the user's Kaggle screenshot reports V5 at
+**0.01996**, versus V4 **0.01984** (V5 is 0.60% worse). V4 remains better on
+Kaggle despite V5's local gains. See the [recorded feedback](reports/V5_KAGGLE_FEEDBACK_2026_10_30.md).
+
+V6 (`geo6_threequarter`) completed local validation and standalone parity and
+was submitted; organizer score pending. The prospective
+[V7 split-gain study](reports/SPLIT_GEOMETRY_CALIBRATION_PROTOCOL.md) separates
+P/I geometry sensitivity and requires complete training/dev means below V6,
+V5 and V4 before packaging. Its [results](reports/SPLIT_GEOMETRY_CALIBRATION_REVIEW.md)
+are separate from the retained earlier measurements.
+
+Later organizer feedback reports V6 **0.03833**: V4 **0.01984** remains best.
+The [feedback and local notebook audit](reports/V6_KAGGLE_FEEDBACK_2026_10_30.md)
+retain the local results while distinguishing them from the organizer outcome.
+
+2026-10-31: V7 completed 91 episodes and failed training; no notebook was
+packaged. The next [reheat-curve study](reports/REHEAT_CURVE_PROTOCOL.md) returns
+to V4 and adjusts only active-PI valve response, without geometry scaling.
+It requires lower complete training/dev means than V4 before packaging and
+adds a runtime variant/source marker for Kaggle log checks. See the
+[study results](reports/REHEAT_CURVE_REVIEW.md); a local pass cannot establish
+an organizer improvement.
+
 The comfort term is **occupancy-weighted**, and the weighting is applied as a
 hard gate. From `smart_control/reward/base_setpoint_energy_carbon_reward.py`:
 
@@ -153,6 +191,130 @@ reports/            notes and paper drafts
 ```
 
 ## Running it
+
+The heating-airflow ablation completed 20 full episodes on four high-comfort-loss
+scenarios plus a deep-cold control. `d_heat` reduced their mean score from
+0.06122466 to 0.04162332 (32.02%), but worsened `fairbanks_1` by 30.31%.
+The submission remains `h_288` pending broader validation. See the
+[heating-mode review](reports/HEAT_DELIVERY_REVIEW.md) for the paired results,
+the hot-water coordination issue, and reproduction commands.
+
+The follow-up `e_sync` coordinates the water pump and inherited water reset
+with reheat airflow. It scores **0.02252922 on the same five scenarios**
+(63.20% below `h_288`, 45.87% below `d_heat`) and **0.01480846 on three dev
+scenarios from one new building**, against `h_288`'s 0.04542558 on those exact
+three. Singapore regresses by 1.09%; the heating scenarios drive the gain.
+See the [coordination experiment](reports/HEAT_SYNC_REVIEW.md) for coverage
+and limitations. Build its separate candidate notebook with:
+
+```bash
+python -m hvaclab.submission.experimental --variant e_sync --verify
+```
+
+A subsequent 1 K heating setback (`n_sync_s1`) failed its two-scenario screen:
+mean score increased 1.40%, so it did not advance to dev or replace `e_sync`.
+See the [night-setback result](reports/NIGHT_SETBACK_REVIEW.md).
+
+The [source and paper audit](reports/SOURCE_PAPER_AUDIT.md) catalogs earlier
+negative results, distinguishes the manuscript's older controller from Version 4,
+and documents observation timing and sensor semantics to check before new tuning.
+
+The [broad-coverage report](reports/E_SYNC_COVERAGE.md) tracks the remaining
+25 training and 17 dev rollouts for `e_sync`. Its resumable runner saves each
+completed episode separately and checks source/config/cache provenance before
+reusing results. Current progress is in
+`experiments/runs/e_sync_coverage/status.json`; the original coverage plan is
+an immutable preparation snapshot. Partial averages are not full-set results.
+
+```bash
+# Resume only when the previous scheduler has stopped; at most two workers.
+python -m hvaclab.coverage --workers 2
+
+# Update the report while running; then collect/evaluate a separate shadow trace.
+python reports/scripts/coverage_report.py --watch --shadow-after
+```
+
+The shadow experiment learns `obs[t+1] - obs[t]` from observations available at
+time `t` and action `t-1`, reflecting the verified one-step temperature delay.
+It evaluates each prediction before learning its target, compares against
+persistence and constant-trend forecasts, and never changes controller actions
+or reads true simulator temperatures. Forecast accuracy alone does not establish
+a better controller. Its default trace is diagnostic, not a full-episode score.
+
+The completed `e_sync` sweeps score **0.01445394 on training (30)** and
+**0.01668440 on dev (20)**, reductions of 47.90% and 51.63% against matched
+`h_288` references. The participant-provided Kaggle V4 public score is **0.01984**.
+The [delay-compensation protocol](reports/DELAY_COMPENSATION_PROTOCOL.md) fixes
+the next closed-loop screen and advancement gates before seeing its results.
+[Progress and results](reports/DELAY_COMPENSATION_REVIEW.md) are saved per rollout;
+the paper has an additive dated section and automatically maintained experiment
+tables. The original source and PDF are preserved under `reports/paper/history/`.
+
+Delay compensation finished with 11 valid full episodes: its training-selected
+candidate regressed **2.98% on the four-case dev screen**, so it was rejected.
+The [scheduled cooling-hold protocol](reports/HOLD_SCHEDULE_PROTOCOL.md) tests
+shorter cooling-run persistence outside the PI window, preserving flat bands.
+[Progress and results](reports/HOLD_SCHEDULE_REVIEW.md) are saved automatically.
+Only a candidate passing complete matched training/dev coverage proceeds to
+standalone notebook packaging and action-parity verification. The pipeline
+records the resulting notebook path; it never submits to Kaggle.
+
+The selected zero-hold candidate subsequently failed dev (+2.44% mean score),
+so that experiment stopped without a new submission. A separately labeled
+[one-hour follow-up](reports/HOLD60_FOLLOWUP_PROTOCOL.md) evaluates the remaining
+`s_night12` candidate on dev with unchanged parameters. Its cached training
+episodes are explicitly reused, not counted as new independent evidence.
+[Follow-up results](reports/HOLD60_FOLLOWUP_REVIEW.md) and a new paper table
+are maintained without replacing the previous experiment's measurements.
+
+The one-hour follow-up also failed dev (+3.23%). The next fixed
+[pump-pressure protocol](reports/GUARDED_PUMP_PROTOCOL.md) compares an uncapped
+control, a simple cap after e_sync coordination, and a cap with a cold-zone/
+valve-demand guard. [Progress and results](reports/GUARDED_PUMP_REVIEW.md) are
+recorded separately. The scheduler waits for available RAM before starting a
+simulation; `waiting_for_memory` distinguishes that state from active rollouts.
+All previous experimental results and the V4 artifact remain retained.
+
+The guarded-pump screen finished without a replacement: its guard improved
+training by 0.42% but regressed dev by 0.37%. The next
+[heating-command pump protocol](reports/HEATING_PUMP_PROTOCOL.md) preserves
+reference pressure during any simultaneous cooling/neutral AHU request and
+compares a stricter same-step reheat-airflow-override gate.
+[Progress and results](reports/HEATING_PUMP_REVIEW.md) are maintained separately.
+Passing complete matched coverage leads automatically to a verified standalone
+notebook and suggested description; the V4 file is retained.
+
+Both heating-pump arms subsequently failed dev (+0.45%, with identical scores
+on the screened cases). A full residual-comfort diagnostic then rejected an
+[earlier-prestart sweep](reports/PRESTART_PROTOCOL.md): only 12.00% of comfort
+loss lay in the first two scheduled hours, below the predeclared 25% gate.
+Use `hvaclab.comfort_profile` for clock-aligned profiling; the initial
+timestamp-converted `morning_profile` result is retained as an audit artifact.
+The [cooling-pressure protocol](reports/COOLING_PRESSURE_PROTOCOL.md) tests
+bounded airflow support for hot zones with saturated PI cooling demand.
+[Progress and results](reports/COOLING_PRESSURE_REVIEW.md) and a separate paper
+table are maintained without replacing previous data.
+
+The bounded-pressure arms failed dev (+3.42% for 400 Pa; +4.88% for 600 Pa).
+The [flow-balance follow-up](reports/FLOW_BALANCE_PROTOCOL.md) compensates
+non-target damper openings when raising shared pressure, with a second arm
+protecting near-cold zones constrained by minimum ventilation. The previous
+pressure-only results remain an archived comparator, not independent evidence.
+[Progress and results](reports/FLOW_BALANCE_REVIEW.md) and an additional paper
+table are maintained separately. Complete matched coverage and standalone
+parity are still required before packaging a replacement candidate.
+
+Flow compensation also failed its targeted dev screen (+2.13% unguarded,
++1.70% guarded). The next [bounded PI calibration](reports/PI_CALIBRATION_PROTOCOL.md)
+keeps e_sync's plant coordination and preserves maximum integral contribution
+while testing four one-coordinate gain neighbors on **all 20 dev scenarios**.
+Dev-ranked candidates receive complete training-30 validation automatically;
+if none beats both full means, a fixed second batch checks four joint corners.
+[Progress and complete-cohort results](reports/PI_CALIBRATION_REVIEW.md) are
+saved per rollout. Selection follows the mean-score objective; individual
+regressions are reported rather than used as an additional hard cutoff.
+A passing candidate gets a standalone notebook, validation record and suggested
+submission description. V4 and every earlier measurement remain retained.
 
 ```bash
 pip install -e .

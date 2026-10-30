@@ -1,0 +1,27 @@
+{
+  "scope": "Local V6 notebook only; uploaded Kaggle notebook/run not available",
+  "equivalent_to": "geo6_threequarter",
+  "wrapper_action_pairs": 500,
+  "policy_hash_matches_manifest": true,
+  "notebook_hash_matches_validation": true,
+  "embedded_policy_class": "FinalPolicy",
+  "inheritance": [
+    "FinalPolicy",
+    "GeometryPIPolicy",
+    "CoordinatedHeatPolicy",
+    "HeatDeliveryPolicy",
+    "CoolingHoldPolicy",
+    "ZonePIPolicy",
+    "FanEconomyPolicy",
+    "DeadlineBandPolicy",
+    "PIDWaterResetPolicy",
+    "PIDProportionalReheatPolicy",
+    "PIDEconomizerPolicy",
+    "PIDWorstZonePolicy",
+    "PIDPolicy",
+    "object"
+  ],
+  "run_arguments": {
+    "competition_data_folder": "/kaggle/input/competitions/neurips-2026-smart-buildings/"
+  }
+}

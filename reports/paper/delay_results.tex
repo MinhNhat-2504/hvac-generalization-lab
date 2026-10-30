@@ -1,0 +1,15 @@
+\paragraph{Automatically recorded closed-loop results.}
+Status: \texttt{complete}; stage: \texttt{finished}.
+All entries below require complete 8,640-step episodes on matching scenarios.
+\begin{center}\small
+\begin{tabular}{llrrrr}\toprule
+Cohort & Variant & $n$ & e\_sync & Candidate & Change \\\midrule
+train screen & \texttt{r\_half} & 3 & 0.03207875 & 0.03274332 & +2.07\% \\
+train screen & \texttt{r\_full} & 3 & 0.03207875 & 0.03198167 & -0.30\% \\
+dev screen & \texttt{r\_full} & 4 & 0.02052920 & 0.02114155 & +2.98\% \\
+\bottomrule\end{tabular}\end{center}
+The training and dev screens are subsets of their respective full cohorts, not independent repetitions.
+Completed new rollouts: 11. No candidate replaces Version 4 automatically.
+The zero-blend full-episode control score is $0.01412923$; exact-reproduction gate: passed.
+Experiment decision: dev gate failed; no full sweep or submission change.
+The training-selected candidate is \texttt{r\_full}.

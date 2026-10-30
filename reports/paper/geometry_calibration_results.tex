@@ -1,0 +1,15 @@
+\paragraph{Automatically recorded closed-loop results.}
+Status: \texttt{complete}; stage: \texttt{finished}.
+All entries below require complete 8,640-step episodes on matching scenarios.
+\begin{center}\small
+\begin{tabular}{llrrrr}\toprule
+Cohort & Variant & $n$ & e\_sync & Candidate & Change \\\midrule
+full dev & \texttt{geo\_p\_sqrt} & 20 & 0.01668440 & 0.01621940 & -2.79\% \\
+full dev & \texttt{geo\_pi\_sqrt} & 20 & 0.01668440 & 0.01609201 & -3.55\% \\
+full dev & \texttt{geo\_p\_linear} & 20 & 0.01668440 & 0.01614269 & -3.25\% \\
+full training & \texttt{geo\_pi\_sqrt} & 30 & 0.01445394 & 0.01415713 & -2.05\% \\
+\bottomrule\end{tabular}\end{center}
+These are complete matched cohorts. Dev is repeatedly used model-selection data, not untouched validation. Individual regressions are reported without a hard cutoff.
+Completed new rollouts: 91. No candidate replaces Version 4 automatically.
+The unchanged-PI full-episode control score is $0.01620892$; exact-reproduction gate: passed.
+The selected candidate is \texttt{geo\_pi\_sqrt}.
