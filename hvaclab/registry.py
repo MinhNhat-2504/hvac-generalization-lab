@@ -20,6 +20,17 @@ _OURS: dict[str, tuple[str, str]] = {
     "zone": ("hvaclab.policies.zone_aware", "ZoneAwarePolicy"),
     "zonepi": ("hvaclab.policies.zone_pi", "ZonePIPolicy"),
     "hold": ("hvaclab.policies.cooling_hold", "CoolingHoldPolicy"),
+    "heat": ("hvaclab.policies.heat_delivery", "HeatDeliveryPolicy"),
+    "heat_sync": ("hvaclab.policies.coordinated_heat", "CoordinatedHeatPolicy"),
+    "delay": ("hvaclab.policies.delay_compensated", "DelayCompensatedPolicy"),
+    "scheduled_hold": ("hvaclab.policies.scheduled_hold", "ScheduledHoldPolicy"),
+    "guarded_pump": ("hvaclab.policies.guarded_pump", "GuardedPumpPolicy"),
+    "heating_pump": ("hvaclab.policies.heating_pump", "HeatingPumpPolicy"),
+    "cooling_pressure": ("hvaclab.policies.cooling_pressure", "CoolingPressurePolicy"),
+    "flow_balanced_cooling": ("hvaclab.policies.flow_balanced_cooling", "FlowBalancedCoolingPolicy"),
+    "geometry_pi": ("hvaclab.policies.geometry_pi", "GeometryPIPolicy"),
+    "split_geometry_pi": ("hvaclab.policies.split_geometry_pi", "SplitGeometryPIPolicy"),
+    "reheat_curve": ("hvaclab.policies.reheat_curve", "ReheatCurvePolicy"),
 }
 
 # Parameter variants, for ablation. Each entry is (policy key, kwargs).
@@ -424,3 +435,164 @@ def resolve_policy(key: str) -> type[Any]:
         return POLICY_MAP[key]
 
     raise KeyError(f"unknown policy {key!r}; available: {available()}")
+
+
+# ---------------------------------------------------------------------------
+# Heating-mode comfort. After the fan clamp, the per-zone PI and the cooling
+# hold, comfort loss correlates -0.78 with mean outdoor temperature: ten times
+# worse below 15 C than above it, and the 0-15 C shoulder band is nearly as
+# bad as the deep cold on a quarter of the energy. The worst scenario by
+# comfort, fairbanks_7, averages +6.4 C and never drops below -6.8 C.
+#
+# So it is a heating-mode problem rather than a cold one. A reheat coil heats
+# the air passing through it, and the decision to run a handler is still the
+# inherited loop's, taken on its AGGREGATE zone error -- so when the aggregate
+# is in band every zone under it loses its airflow at once, including the cold
+# outlier the per-zone loop is trying to rescue.
+_BEST288: dict[str, Any] = {**_PIBEST, "hold_steps": 288}
+_D: dict[str, tuple[str, dict[str, Any]]] = {
+    "d_ctrl": ("heat", {**_BEST288, "heat_airflow": False}),
+    "d_heat": ("heat", {**_BEST288, "heat_airflow": True}),
+    # Require a share of the handler's zones to want heat before starting it:
+    # a single unreachable outlier should not buy airflow for everyone else.
+    "d_heat25": ("heat", {**_BEST288, "heat_airflow": True,
+                          "heat_demand_frac": 0.25}),
+    "d_heat50": ("heat", {**_BEST288, "heat_airflow": True,
+                          "heat_demand_frac": 0.5}),
+}
+_W.update(_D)
+_VARIANTS.update(_D)
+
+# Factorial follow-up: water interlock and a physical ventilation-loss guard.
+# No building identifiers or weather labels enter the controller.
+_E = {
+    "e_sync": ("heat_sync", {**_BEST288, "coordinate_water": True}),
+    "e_guard_air": ("heat_sync", {**_BEST288, "coordinate_water": False,
+                                 "minimum_delivery_efficiency": 0.5}),
+    "e_guard_sync": ("heat_sync", {**_BEST288, "coordinate_water": True,
+                                  "minimum_delivery_efficiency": 0.5}),
+}
+_VARIANTS.update(_E)
+
+# Revisit a small heating setback only after fixing the reheat delivery path.
+# Daytime comfort and cooling bands are unchanged. The inherited three-hour
+# ramp restores the heating band before the scored window opens.
+_VARIANTS["n_sync_s1"] = (
+    "heat_sync", {**_BEST288, "coordinate_water": True,
+                  "setback_k": 1.0, "setup_k": 0.0},
+)
+
+# Fixed, bounded delay-compensation screen; plant coordination stays e_sync.
+for _key, _blend in (("r_zero", 0.0), ("r_half", 0.5), ("r_full", 1.0)):
+    _VARIANTS[_key] = ("delay", {**_BEST288, "coordinate_water": True,
+                               "prediction_blend": _blend,
+                               "prediction_limit_k": 1.0,
+                               "prediction_warmup": 288})
+
+for _key, _night_steps in (("s_hold_ctrl", 288), ("s_night0", 0), ("s_night12", 12)):
+    _VARIANTS[_key] = ("scheduled_hold", {**_BEST288, "coordinate_water": True,
+                                        "off_window_hold_steps": _night_steps})
+
+for _key, _kwargs in (
+    ("u_pump_ctrl", {"pump_limit": None}),
+    ("u_pump_cap", {"pump_limit": 0.0, "guard_pump": False}),
+    ("u_pump_guard", {"pump_limit": 0.0, "guard_pump": True,
+                       "pump_reserve_k": 0.5, "pump_valve_limit": 0.8}),
+):
+    _VARIANTS[_key] = ("guarded_pump", {**_BEST288, "coordinate_water": True, **_kwargs})
+
+for _key, _kwargs in (
+    ("v_pump_ctrl", {"pump_limit": None}),
+    ("v_pump_warm", {"pump_limit": 0.0, "require_heat_override": False}),
+    ("v_pump_heat", {"pump_limit": 0.0, "require_heat_override": True}),
+):
+    _VARIANTS[_key] = ("heating_pump", {**_BEST288, "coordinate_water": True,
+                                       "guard_pump": True, "pump_reserve_k": 0.5,
+                                       "pump_valve_limit": 0.8, **_kwargs})
+
+for _key, _hours in (("a_start_ctrl", 1.0), ("a_start2", 2.0), ("a_start3", 3.0)):
+    _VARIANTS[_key] = ("heat_sync", {**_BEST288, "coordinate_water": True,
+                                    "prestart_hours": _hours})
+
+for _key, _ceiling in (("cpi_ctrl", None), ("cpi_400", -0.6), ("cpi_600", -0.4)):
+    _VARIANTS[_key] = ("cooling_pressure", {**_BEST288, "coordinate_water": True,
+                                           "cooling_pressure_ceiling": _ceiling,
+                                           "cooling_pressure_floor": -0.8,
+                                           "cooling_effort_threshold": 0.8,
+                                           "cooling_error_full_k": 1.0})
+
+for _key, _ceiling, _protect in (("cfb_ctrl", None, False),
+                                  ("cfb_comp", -0.6, False),
+                                  ("cfb_guard", -0.6, True)):
+    _VARIANTS[_key] = ("flow_balanced_cooling", {**_BEST288, "coordinate_water": True,
+                                                "cooling_pressure_ceiling": _ceiling,
+                                                "cooling_pressure_floor": -0.8,
+                                                "cooling_effort_threshold": 0.8,
+                                                "cooling_error_full_k": 1.0,
+                                                "protect_minimum_flow": _protect,
+                                                "minimum_damper": 0.1,
+                                                "cold_neighbor_margin_k": 0.5})
+
+# One-coordinate zone-PI calibration on the actual e_sync plant. Keep the
+# maximum integral contribution equal to one when varying its gain.
+for _key, _kp, _ki in (("pi_cal_ctrl", 0.1, 0.005),
+                       ("pi_cal_slow_i", 0.1, 0.0025),
+                       ("pi_cal_fast_i", 0.1, 0.01),
+                       ("pi_cal_soft_p", 0.05, 0.005),
+                       ("pi_cal_firm_p", 0.2, 0.005),
+                       ("pi_cal_soft_slow", 0.05, 0.0025),
+                       ("pi_cal_soft_fast", 0.05, 0.01),
+                       ("pi_cal_firm_slow", 0.2, 0.0025),
+                       ("pi_cal_firm_fast", 0.2, 0.01)):
+    _VARIANTS[_key] = ("heat_sync", {**_BEST288, "coordinate_water": True,
+                                    "kp": _kp, "ki": _ki,
+                                    "integral_limit": 1.0 / _ki})
+
+for _key, _enabled, _exponent, _scale_i in (
+    ("geo_ctrl", False, 0.5, False),
+    ("geo_p_sqrt", True, 0.5, False),
+    ("geo_pi_sqrt", True, 0.5, True),
+    ("geo_p_linear", True, 1.0, False),
+):
+    _VARIANTS[_key] = ("geometry_pi", {**_BEST288, "coordinate_water": True,
+                                      "integral_limit": 200.0,
+                                      "area_gain_enabled": _enabled,
+                                      "reference_area_cv": 2484.0,
+                                      "area_exponent": _exponent,
+                                      "scale_integral": _scale_i,
+                                      "minimum_gain_scale": 0.5,
+                                      "maximum_gain_scale": 2.0})
+
+# Prospective V6 refinement: vary geometry sensitivity around V5's exponent
+# 0.5, preserving both integral authority and all plant/schedule settings.
+for _key, _exponent in (("geo6_ctrl", 0.5), ("geo6_quarter", 0.25),
+                        ("geo6_threequarter", 0.75), ("geo6_linear", 1.0)):
+    _VARIANTS[_key] = ("geometry_pi", {**_BEST288, "coordinate_water": True,
+                                      "integral_limit": 200.0,
+                                      "area_gain_enabled": True,
+                                      "reference_area_cv": 2484.0,
+                                      "area_exponent": _exponent,
+                                      "scale_integral": True,
+                                      "minimum_gain_scale": 0.5,
+                                      "maximum_gain_scale": 2.0})
+
+# V7 separates response to instantaneous error from accumulated error.
+for _key, _p, _i in (("geo7_ctrl", .75, .75),
+                     ("geo7_soft_i", .75, .5),
+                     ("geo7_strong_i", .75, 1.),
+                     ("geo7_soft_p", .5, .75)):
+    _VARIANTS[_key] = ("split_geometry_pi", {**_BEST288, "coordinate_water": True,
+                                            "integral_limit": 200.,
+                                            "area_gain_enabled": True,
+                                            "reference_area_cv": 2484.,
+                                            "area_exponent": _p,
+                                            "integral_area_exponent": _i,
+                                            "scale_integral": True,
+                                            "minimum_gain_scale": .5,
+                                            "maximum_gain_scale": 2.})
+
+# Return to the best organizer-scored V4 plant; no geometry dependence.
+for _key, _power in (("valve8_ctrl", 1.), ("valve8_sqrt", .5),
+                      ("valve8_gentle", .75), ("valve8_soft", 1.5)):
+    _VARIANTS[_key] = ("reheat_curve", {**_BEST288, "coordinate_water": True,
+                                      "reheat_exponent": _power})

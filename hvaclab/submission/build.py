@@ -248,6 +248,15 @@ def build_notebook(policy_source: str, title: str, results: str,
             policy_source=policy_source, title=title, results=results,
             cooling_note=cooling_note,
         )
+    # The standalone module's future import otherwise lands below the
+    # notebook's inference-server imports, which is a SyntaxError even though
+    # the standalone policy itself compiles. Hoist it for the complete cell.
+    future = "from __future__ import annotations"
+    lines = source.splitlines(keepends=True)
+    if any(line.strip() == future for line in lines):
+        source = future + "\n\n" + "".join(
+            line for line in lines if line.strip() != future)
+    compile(source, "submission_notebook.py", "exec")
     return {
         "cells": [{
             "cell_type": "code",

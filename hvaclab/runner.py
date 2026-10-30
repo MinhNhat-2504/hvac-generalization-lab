@@ -251,9 +251,8 @@ def run_sweep(
 
     results: list[ScenarioResult] = []
     t0 = time.time()
-    ctx = mp.get_context("spawn")
-    with ctx.Pool(processes=workers) as pool:
-        for i, raw in enumerate(pool.imap_unordered(_run_one, tasks), 1):
+    def collect(raw_results):
+        for i, raw in enumerate(raw_results, 1):
             res = ScenarioResult(**raw)
             results.append(res)
             if progress:
@@ -265,6 +264,16 @@ def run_sweep(
                 )
                 if res.error:
                     print(res.error, flush=True)
+
+    if workers == 1:
+        # A real serial path needs neither multiprocessing pipes nor a second
+        # interpreter. Useful on low-memory machines and restricted Windows
+        # sessions where creating a named pipe is denied.
+        collect(map(_run_one, tasks))
+    else:
+        ctx = mp.get_context("spawn")
+        with ctx.Pool(processes=workers) as pool:
+            collect(pool.imap_unordered(_run_one, tasks))
 
     if progress:
         print(f"\nsweep of {len(tasks)} runs in {time.time() - t0:.0f}s "

@@ -66,3 +66,24 @@ smart_buildings/buildings/*.yaml
 # `python -m hvaclab.submission.build --verify`; the sources it assembles from
 # are tracked, the assembly is not.
 experiments/submission/
+
+# Reproducible worker descriptors and machine-local runtime state. Completed
+# scenario records, aggregate scores and frozen protocols remain tracked.
+experiments/runs/**/*.log
+experiments/runs/**/*.tmp
+experiments/runs/**/jobs/*.job.json
+experiments/runs/**/paper_build/
+experiments/runs/**/scheduler.lock
+experiments/runs/**/notification_watcher.json
+experiments/runs/**/completion_notice.json
+experiments/runs/**/retired_notification_helpers.json
+experiments/runs/**/attempts.jsonl
+
+# The active study is not a finished measurement record. Publish its frozen
+# protocol now and add its results after the study completes.
+experiments/runs/reheat_curve_calibration/*
+!experiments/runs/reheat_curve_calibration/protocol.json
+
+# Filesystem fixtures from local tests, including inaccessible empty temp dirs.
+tests/tmp*/
+tests/coverage_test_*/

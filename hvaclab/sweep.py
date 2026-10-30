@@ -12,13 +12,19 @@ most of its advantage is in the eco-setback hours a short run truncates.
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
-
-from hvaclab import runner
-from hvaclab.registry import available
 
 
 def main() -> None:
+    # The serial runner imports numpy in this process rather than in a spawned
+    # worker. Set thread limits before runner/available import numpy/scipy.
+    for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+                "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+        os.environ[var] = "1"
+    from hvaclab import runner
+    from hvaclab.registry import available
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--policies", nargs="+", required=True,
                         help=f"policy keys; available: {', '.join(available())}")
