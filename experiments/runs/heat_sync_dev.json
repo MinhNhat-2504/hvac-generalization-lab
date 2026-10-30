@@ -1,0 +1,69 @@
+{
+  "results": [
+    {
+      "building": "building_9001",
+      "weather": "denver_1",
+      "policy": "e_sync",
+      "steps": 8640,
+      "total_reward": -155.10193314046228,
+      "mean_reward": -0.01795161263199795,
+      "prod_regret": -16.531416355894862,
+      "energy_cost": 235.12422756971137,
+      "carbon": 490.7911887259761,
+      "occupied_steps": 3115,
+      "reward_occupied": -62.4834649853874,
+      "reward_unoccupied": -92.61846815507488,
+      "mean_occupancy": 7.460300925925926,
+      "seconds": 399.9781160354614,
+      "error": ""
+    },
+    {
+      "building": "building_9001",
+      "weather": "fairbanks_3",
+      "policy": "e_sync",
+      "steps": 8640,
+      "total_reward": -125.87969264961248,
+      "mean_reward": -0.014569408871482926,
+      "prod_regret": -11.169984565566665,
+      "energy_cost": 184.39657188803176,
+      "carbon": 411.4919376377675,
+      "occupied_steps": 3271,
+      "reward_occupied": -57.70120784989558,
+      "reward_unoccupied": -68.1784847997169,
+      "mean_occupancy": 7.817939814814815,
+      "seconds": 428.0543029308319,
+      "error": ""
+    },
+    {
+      "building": "building_9001",
+      "weather": "singapore_2",
+      "policy": "e_sync",
+      "steps": 8640,
+      "total_reward": -102.85369485634419,
+      "mean_reward": -0.011904362830595393,
+      "prod_regret": -50.03228162515984,
+      "energy_cost": 294.1283516420908,
+      "carbon": 70.04327771597855,
+      "occupied_steps": 3271,
+      "reward_occupied": -84.51590440189466,
+      "reward_unoccupied": -18.337790454449532,
+      "mean_occupancy": 7.817939814814815,
+      "seconds": 388.28555488586426,
+      "error": ""
+    }
+  ],
+  "summary": {
+    "e_sync": {
+      "score": 0.01480846144469209,
+      "n": 3,
+      "worst": 0.01795161263199795,
+      "worst_scenario": "building_9001/denver_1",
+      "loss_occupied": 204.70057723717764,
+      "loss_unoccupied": 179.1347434092413,
+      "occupied_step_frac": 0.37256944444444445,
+      "w_prod": 0.0017993907996903095,
+      "w_energy": 0.005506552091819707,
+      "w_carbon": 0.007502518549997856
+    }
+  }
+}

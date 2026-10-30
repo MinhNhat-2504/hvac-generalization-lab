@@ -1,0 +1,28 @@
+{
+  "task": {
+    "split": "training",
+    "policy": "geo7_strong_i",
+    "building": "building_train_5",
+    "weather": "denver_3",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/training_scenarios"
+  },
+  "fingerprint": "01b05c602a70c354554020e11d09af8a1e2fd3f2565e431c4a1ca9b5d5f5560e",
+  "result": {
+    "building": "building_train_5",
+    "weather": "denver_3",
+    "policy": "geo7_strong_i",
+    "steps": 8640,
+    "total_reward": -71.86451582946756,
+    "mean_reward": -0.008317652295077265,
+    "prod_regret": -8.999236946278813,
+    "energy_cost": 112.66877304085028,
+    "carbon": 219.6560953746921,
+    "occupied_steps": 3277,
+    "reward_occupied": -34.92350171401631,
+    "reward_unoccupied": -36.94101411545125,
+    "mean_occupancy": 30.899768518518517,
+    "seconds": 779.2276389598846,
+    "error": ""
+  }
+}

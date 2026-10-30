@@ -1,0 +1,25 @@
+{
+  "policy": "e_sync",
+  "steps": 8640,
+  "scenarios": [
+    "building_9001/denver_1",
+    "building_9001/fairbanks_3",
+    "building_9001/singapore_2"
+  ],
+  "reference_run": "experiments/runs/h288_dev.json",
+  "reference_sha256": "66c3fbdec020547577aae78a1b315cc526c9eb91689271fbdd7a2667f70e59e5",
+  "selection_basis": "Positive full-episode training results on fairbanks_1 and fairbanks_7. Separate guard dev sweep was aborted, not treated as a complete result.",
+  "policy_sources_sha256": {
+    "hvaclab/policies/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hvaclab/policies/cooling_hold.py": "0a794d1e0524871985099a941e9640dd9733b40eb18af4feb17e58029e487338",
+    "hvaclab/policies/coordinated_heat.py": "605ae3e0f54e58cdaf9868e104e1e063c215164376d6a333c0076050b13c7861",
+    "hvaclab/policies/deadline_band.py": "d3bf0886da3176867f26c952726500b9b2d9b4d93c819d72ac539b66bc827089",
+    "hvaclab/policies/fan_economy.py": "b0e01c849e146a2c562d18acfbbd4e78e4a115220e50d1e3acdda307cb28902a",
+    "hvaclab/policies/heat_delivery.py": "07b5a2378e6f6cf605890be94f463936dafd78d842b27e310e7b788ed99029dd",
+    "hvaclab/policies/occupancy_gated.py": "1a848b6a5535ba61e88cfe52b5af8762677aa93ead891389bdd94b227f12cc87",
+    "hvaclab/policies/zone_aware.py": "79eca3820112372f67a7615a2c8338428bec4731252ce9364d73725b2d79ff0e",
+    "hvaclab/policies/zone_pi.py": "2c4c7f3e30069e43061a6e0e3cba59e375b21bba7fb7b0af253b05bc652fbf8e",
+    "smart_buildings/baselines/pid.py": "0b938394e2afef0186775afb5dd8215369732fbe4af1f9829b8bc05a6166eeff",
+    "smart_buildings/baselines/pid_plus.py": "327ae4b72867c77899aaabbec0308934cb7b174a9033f44fe3466dfec9642ed9"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "captured_at_utc": "2026-10-26T09:27:52Z",
+  "process_started_at_utc": "2026-10-26T08:55:47Z",
+  "command": [
+    "-m",
+    "hvaclab.sweep",
+    "--policies",
+    "d_ctrl",
+    "d_heat",
+    "d_heat25",
+    "d_heat50",
+    "--scenarios",
+    "building_train_7/fairbanks_7",
+    "building_train_2/fairbanks_2",
+    "building_train_7/atlanta_8",
+    "building_train_4/denver_2",
+    "building_train_1/fairbanks_1",
+    "--steps",
+    "8640",
+    "--workers",
+    "6",
+    "--out",
+    "experiments/runs/ablation_heat.json"
+  ],
+  "note": "Captured during the existing batch. No measured policy, registry, runner or simulator was edited during this review. Hashes are a review snapshot, not an instrumented record of process imports.",
+  "files": {
+    "hvaclab/registry.py": {
+      "sha256": "41520594f5376e75f789a9451878e9eeae84dfbf216b0a4c501a066de4a0f1f4",
+      "modified_before_process_start": true
+    },
+    "hvaclab/runner.py": {
+      "sha256": "b77985479635edb3d130c17fa956d6e6b06412645f4f28556f076b3496b370a6",
+      "modified_before_process_start": true
+    },
+    "hvaclab/policies/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modified_before_process_start": true
+    },
+    "hvaclab/policies/cooling_hold.py": {
+      "sha256": "0a794d1e0524871985099a941e9640dd9733b40eb18af4feb17e58029e487338",
+      "modified_before_process_start": true
+    },
+    "hvaclab/policies/deadline_band.py": {
+      "sha256": "d3bf0886da3176867f26c952726500b9b2d9b4d93c819d72ac539b66bc827089",
+      "modified_before_process_start": true
+    },
+    "hvaclab/policies/fan_economy.py": {
+      "sha256": "b0e01c849e146a2c562d18acfbbd4e78e4a115220e50d1e3acdda307cb28902a",
+      "modified_before_process_start": true
+    },
+    "hvaclab/policies/heat_delivery.py": {
+      "sha256": "7ccd3c51f5c922e7ed2101e876f58d5cb47b5d602c4fa72c86827c48690dc350",
+      "modified_before_process_start": true
+    },
+    "hvaclab/policies/occupancy_gated.py": {
+      "sha256": "1a848b6a5535ba61e88cfe52b5af8762677aa93ead891389bdd94b227f12cc87",
+      "modified_before_process_start": true
+    },
+    "hvaclab/policies/zone_aware.py": {
+      "sha256": "79eca3820112372f67a7615a2c8338428bec4731252ce9364d73725b2d79ff0e",
+      "modified_before_process_start": true
+    },
+    "hvaclab/policies/zone_pi.py": {
+      "sha256": "2c4c7f3e30069e43061a6e0e3cba59e375b21bba7fb7b0af253b05bc652fbf8e",
+      "modified_before_process_start": true
+    },
+    "smart_buildings/baselines/pid.py": {
+      "sha256": "0b938394e2afef0186775afb5dd8215369732fbe4af1f9829b8bc05a6166eeff",
+      "modified_before_process_start": true
+    },
+    "smart_buildings/baselines/pid_plus.py": {
+      "sha256": "327ae4b72867c77899aaabbec0308934cb7b174a9033f44fe3466dfec9642ed9",
+      "modified_before_process_start": true
+    }
+  }
+}

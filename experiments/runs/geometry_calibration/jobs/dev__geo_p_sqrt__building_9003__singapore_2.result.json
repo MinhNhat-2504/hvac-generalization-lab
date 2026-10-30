@@ -1,0 +1,28 @@
+{
+  "task": {
+    "split": "dev",
+    "policy": "geo_p_sqrt",
+    "building": "building_9003",
+    "weather": "singapore_2",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/holdout_scenarios/dev"
+  },
+  "fingerprint": "794f4eb15b905f4d8b84e0ea645d7374995795e48e8d7912fc9f563d8067dceb",
+  "result": {
+    "building": "building_9003",
+    "weather": "singapore_2",
+    "policy": "geo_p_sqrt",
+    "steps": 8640,
+    "total_reward": -96.70994645353812,
+    "mean_reward": -0.011193280839529876,
+    "prod_regret": -43.25528397128073,
+    "energy_cost": 285.7374462699986,
+    "carbon": 68.04643412840596,
+    "occupied_steps": 3269,
+    "reward_occupied": -79.96977656520903,
+    "reward_unoccupied": -16.740169888329092,
+    "mean_occupancy": 8.697685185185184,
+    "seconds": 378.7700824737549,
+    "error": ""
+  }
+}

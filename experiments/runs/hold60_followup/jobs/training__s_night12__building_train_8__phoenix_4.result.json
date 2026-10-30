@@ -1,0 +1,30 @@
+{
+  "task": {
+    "split": "training",
+    "policy": "s_night12",
+    "building": "building_train_8",
+    "weather": "phoenix_4",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/training_scenarios"
+  },
+  "result": {
+    "building": "building_train_8",
+    "weather": "phoenix_4",
+    "policy": "s_night12",
+    "steps": 8640,
+    "total_reward": -198.55452750356343,
+    "mean_reward": -0.022980848090690214,
+    "prod_regret": -19.15281022461386,
+    "energy_cost": 758.7634646474994,
+    "carbon": 176.55074198210252,
+    "occupied_steps": 3112,
+    "reward_occupied": -134.64017225801945,
+    "reward_unoccupied": -63.91435524554399,
+    "mean_occupancy": 10.956597222222221,
+    "seconds": 390.7485866546631,
+    "error": ""
+  },
+  "fingerprint": "e475d5102e43e3c687e8798cfe7e5d68ee6722c3dc0c7b2bbb18e0fa6cf406d1",
+  "reused_from": "experiments\\runs\\hold_schedule\\jobs\\training__s_night12__building_train_8__phoenix_4.result.json",
+  "original_fingerprint": "61257c093107a9f73f6c61330f86aa365e2c0dda2afced495f96c19a1eb70ae4"
+}

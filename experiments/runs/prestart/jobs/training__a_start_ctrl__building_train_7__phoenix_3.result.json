@@ -1,0 +1,30 @@
+{
+  "task": {
+    "split": "training",
+    "policy": "a_start_ctrl",
+    "building": "building_train_7",
+    "weather": "phoenix_3",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/training_scenarios"
+  },
+  "result": {
+    "building": "building_train_7",
+    "weather": "phoenix_3",
+    "policy": "a_start_ctrl",
+    "steps": 8640,
+    "total_reward": -140.04505214563915,
+    "mean_reward": -0.016208918072411937,
+    "prod_regret": -73.40048302114883,
+    "energy_cost": 386.4142760820878,
+    "carbon": 93.60953575660278,
+    "occupied_steps": 3254,
+    "reward_occupied": -117.02960571285803,
+    "reward_unoccupied": -23.01544643278112,
+    "mean_occupancy": 6.769560185185185,
+    "seconds": 189.0779999999795,
+    "error": ""
+  },
+  "fingerprint": "bb230671c3f8bb2379d0f7e9e68a30a21bf3aafa775dace63e4821f91d2c4292",
+  "reused_from": "experiments\\runs\\prestart_profile_policyclock.json",
+  "diagnostic_sha256": "3f7ef396b98bdf0d65002652e49027533fd64bb77884b96a09373114452c7d79"
+}

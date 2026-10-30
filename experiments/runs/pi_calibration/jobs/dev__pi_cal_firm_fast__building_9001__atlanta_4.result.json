@@ -1,0 +1,28 @@
+{
+  "task": {
+    "split": "dev",
+    "policy": "pi_cal_firm_fast",
+    "building": "building_9001",
+    "weather": "atlanta_4",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/holdout_scenarios/dev"
+  },
+  "fingerprint": "6759cd30b4f454870253b43ffd23c9af751d6470071ee4dfec4789f6f0c2cc8a",
+  "result": {
+    "building": "building_9001",
+    "weather": "atlanta_4",
+    "policy": "pi_cal_firm_fast",
+    "steps": 8640,
+    "total_reward": -100.02235425086383,
+    "mean_reward": -0.011576661371627758,
+    "prod_regret": -48.94403030882495,
+    "energy_cost": 286.0363864299052,
+    "carbon": 67.24329392825166,
+    "occupied_steps": 2959,
+    "reward_occupied": -80.36611616497794,
+    "reward_unoccupied": -19.65623808588589,
+    "mean_occupancy": 7.07662037037037,
+    "seconds": 365.7336504459381,
+    "error": ""
+  }
+}

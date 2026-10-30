@@ -1,0 +1,8 @@
+{
+  "status": "aborted",
+  "policy": "e_guard_sync",
+  "planned_scenarios": 5,
+  "complete_result_file": false,
+  "reason": "Prioritize e_sync validation after positive full-episode training results in both warm-heating and deep-cold scenarios; guard dev trial is not used as a complete score.",
+  "partial_log": "experiments/traces/heat_sync_dev.log"
+}

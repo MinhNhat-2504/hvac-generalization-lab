@@ -1,0 +1,414 @@
+{
+  "status": {
+    "status": "complete",
+    "fingerprint": "53b35f9ebd164687f93ddb1148501de91e9fe705c043ce94ef7ce3a14b0f534d",
+    "counts": {
+      "training": {
+        "completed": 30,
+        "expected": 30
+      },
+      "dev": {
+        "completed": 20,
+        "expected": 20
+      }
+    },
+    "new_completed": 42,
+    "new_total": 42,
+    "failed": [],
+    "active": [],
+    "pending": 0,
+    "updated_at": "2026-10-27T07:32:44+0700"
+  },
+  "comparisons": {
+    "training": {
+      "n": 30,
+      "e_sync": {
+        "score": 0.014453943529822781,
+        "comfort": 0.0020153432327066514,
+        "energy": 0.00702191667805338,
+        "carbon": 0.005416683621951081
+      },
+      "h_288": {
+        "score": 0.02774466315808281,
+        "comfort": 0.015763949211349174,
+        "energy": 0.007059203375049735,
+        "carbon": 0.0049215105724397645
+      },
+      "change_pct": -47.903697920326216,
+      "improved": 24,
+      "regressed": 5,
+      "scenarios": [
+        {
+          "scenario": "building_train_1/atlanta_2",
+          "e_sync": 0.007999107094860847,
+          "h_288": 0.01843306607144318,
+          "difference": -0.010433958976582332,
+          "change_pct": -56.604576450505974
+        },
+        {
+          "scenario": "building_train_1/denver_7",
+          "e_sync": 0.005897335370625948,
+          "h_288": 0.02665057886433673,
+          "difference": -0.020753243493710778,
+          "change_pct": -77.87164248609382
+        },
+        {
+          "scenario": "building_train_1/fairbanks_1",
+          "e_sync": 0.05873990564069337,
+          "h_288": 0.07685394213830629,
+          "difference": -0.018114036497612923,
+          "change_pct": -23.569430524480993
+        },
+        {
+          "scenario": "building_train_1/phoenix_5",
+          "e_sync": 0.031425629556798854,
+          "h_288": 0.031235829251629724,
+          "difference": 0.00018980030516912993,
+          "change_pct": 0.607636517795429
+        },
+        {
+          "scenario": "building_train_1/singapore_8",
+          "e_sync": 0.014692974985733806,
+          "h_288": 0.014692974985733806,
+          "difference": 0.0,
+          "change_pct": 0.0
+        },
+        {
+          "scenario": "building_train_2/atlanta_3",
+          "e_sync": 0.008591649428822103,
+          "h_288": 0.009941378301777638,
+          "difference": -0.0013497288729555357,
+          "change_pct": -13.57687869813975
+        },
+        {
+          "scenario": "building_train_2/denver_8",
+          "e_sync": 0.008788989898893837,
+          "h_288": 0.030545316151534403,
+          "difference": -0.021756326252640568,
+          "change_pct": -71.22639079820972
+        },
+        {
+          "scenario": "building_train_2/fairbanks_2",
+          "e_sync": 0.016656023676862503,
+          "h_288": 0.059844107455749224,
+          "difference": -0.04318808377888672,
+          "change_pct": -72.16764626462424
+        },
+        {
+          "scenario": "building_train_2/phoenix_6",
+          "e_sync": 0.01907322601640839,
+          "h_288": 0.018878989563331238,
+          "difference": 0.0001942364530771526,
+          "change_pct": 1.0288498355569775
+        },
+        {
+          "scenario": "building_train_2/singapore_1",
+          "e_sync": 0.01177421175656632,
+          "h_288": 0.011779855119942478,
+          "difference": -5.643363376158644e-06,
+          "change_pct": -0.047906899691874116
+        },
+        {
+          "scenario": "building_train_4/atlanta_5",
+          "e_sync": 0.015174345472840505,
+          "h_288": 0.015196344326228413,
+          "difference": -2.199885338790772e-05,
+          "change_pct": -0.1447641150769341
+        },
+        {
+          "scenario": "building_train_4/denver_2",
+          "e_sync": 0.01005284430759835,
+          "h_288": 0.048535773265412537,
+          "difference": -0.03848292895781419,
+          "change_pct": -79.28776316671524
+        },
+        {
+          "scenario": "building_train_4/fairbanks_4",
+          "e_sync": 0.004748059784789457,
+          "h_288": 0.019637634175255783,
+          "difference": -0.014889574390466325,
+          "change_pct": -75.8216303327811
+        },
+        {
+          "scenario": "building_train_4/phoenix_8",
+          "e_sync": 0.004781961846098663,
+          "h_288": 0.020478860881817905,
+          "difference": -0.01569689903571924,
+          "change_pct": -76.649278132729
+        },
+        {
+          "scenario": "building_train_4/singapore_3",
+          "e_sync": 0.015740585469588675,
+          "h_288": 0.01573520754209975,
+          "difference": 5.377927488923323e-06,
+          "change_pct": 0.03417767115263537
+        },
+        {
+          "scenario": "building_train_5/atlanta_6",
+          "e_sync": 0.009764674740836147,
+          "h_288": 0.009975983439819387,
+          "difference": -0.00021130869898323967,
+          "change_pct": -2.118174115444049
+        },
+        {
+          "scenario": "building_train_5/denver_3",
+          "e_sync": 0.008596526212090689,
+          "h_288": 0.04362077477411061,
+          "difference": -0.035024248562019925,
+          "change_pct": -80.29258706062043
+        },
+        {
+          "scenario": "building_train_5/fairbanks_5",
+          "e_sync": 0.0041222710713809734,
+          "h_288": 0.008005698602452354,
+          "difference": -0.0038834275310713805,
+          "change_pct": -48.508290455523586
+        },
+        {
+          "scenario": "building_train_5/phoenix_1",
+          "e_sync": 0.0069226572191561685,
+          "h_288": 0.03286485317628418,
+          "difference": -0.025942195957128013,
+          "change_pct": -78.93598616727833
+        },
+        {
+          "scenario": "building_train_5/singapore_4",
+          "e_sync": 0.01236581076984517,
+          "h_288": 0.012324182591837134,
+          "difference": 4.1628178008035546e-05,
+          "change_pct": 0.3377763814989887
+        },
+        {
+          "scenario": "building_train_7/atlanta_8",
+          "e_sync": 0.013068100279898503,
+          "h_288": 0.0534108214190471,
+          "difference": -0.040342721139148593,
+          "change_pct": -75.53286032175079
+        },
+        {
+          "scenario": "building_train_7/denver_5",
+          "e_sync": 0.012444280203757574,
+          "h_288": 0.01311204493035413,
+          "difference": -0.0006677647265965567,
+          "change_pct": -5.092758072012815
+        },
+        {
+          "scenario": "building_train_7/fairbanks_7",
+          "e_sync": 0.014129226427474738,
+          "h_288": 0.06747863338071688,
+          "difference": -0.05334940695324215,
+          "change_pct": -79.06118467492202
+        },
+        {
+          "scenario": "building_train_7/phoenix_3",
+          "e_sync": 0.016208918072411937,
+          "h_288": 0.016552996071067392,
+          "difference": -0.00034407799865545513,
+          "change_pct": -2.0786448397511648
+        },
+        {
+          "scenario": "building_train_7/singapore_6",
+          "e_sync": 0.013724401905017624,
+          "h_288": 0.014330437370505125,
+          "difference": -0.0006060354654875005,
+          "change_pct": -4.229008855897454
+        },
+        {
+          "scenario": "building_train_8/atlanta_1",
+          "e_sync": 0.009918736201206212,
+          "h_288": 0.03291488894427925,
+          "difference": -0.022996152743073036,
+          "change_pct": -69.86550306155557
+        },
+        {
+          "scenario": "building_train_8/denver_6",
+          "e_sync": 0.009560798704744662,
+          "h_288": 0.011896486556713205,
+          "difference": -0.002335687851968542,
+          "change_pct": -19.633425724761654
+        },
+        {
+          "scenario": "building_train_8/fairbanks_8",
+          "e_sync": 0.032574116541139925,
+          "h_288": 0.060599986990945987,
+          "difference": -0.028025870449806062,
+          "change_pct": -46.24732090122941
+        },
+        {
+          "scenario": "building_train_8/phoenix_4",
+          "e_sync": 0.02336711091899175,
+          "h_288": 0.02419783616689394,
+          "difference": -0.0008307252479021893,
+          "change_pct": -3.4330559235653424
+        },
+        {
+          "scenario": "building_train_8/singapore_7",
+          "e_sync": 0.012713826319549702,
+          "h_288": 0.012614412232858497,
+          "difference": 9.941408669120536e-05,
+          "change_pct": 0.7880992380465246
+        }
+      ]
+    },
+    "dev": {
+      "n": 20,
+      "e_sync": {
+        "score": 0.016684401534295998,
+        "comfort": 0.003419161307318989,
+        "energy": 0.006591222311610888,
+        "carbon": 0.006674017913897631
+      },
+      "h_288": {
+        "score": 0.03449141060931092,
+        "comfort": 0.022079579479232773,
+        "energy": 0.0064667765477144186,
+        "carbon": 0.0059450545822429274
+      },
+      "change_pct": -51.62737261377167,
+      "improved": 17,
+      "regressed": 3,
+      "scenarios": [
+        {
+          "scenario": "building_9000/atlanta_4",
+          "e_sync": 0.015520697141682535,
+          "h_288": 0.01551860694499912,
+          "difference": 2.0901966834158126e-06,
+          "change_pct": 0.013468971092733817
+        },
+        {
+          "scenario": "building_9000/denver_1",
+          "e_sync": 0.04147822560759306,
+          "h_288": 0.07221466639780669,
+          "difference": -0.030736440790213627,
+          "change_pct": -42.56260164783806
+        },
+        {
+          "scenario": "building_9000/fairbanks_3",
+          "e_sync": 0.035420502205832455,
+          "h_288": 0.06937344523426638,
+          "difference": -0.03395294302843392,
+          "change_pct": -48.942275987272396
+        },
+        {
+          "scenario": "building_9000/phoenix_2",
+          "e_sync": 0.011875711655415936,
+          "h_288": 0.018402239092246843,
+          "difference": -0.006526527436830907,
+          "change_pct": -35.46594196562003
+        },
+        {
+          "scenario": "building_9000/singapore_2",
+          "e_sync": 0.017353122803925678,
+          "h_288": 0.017560192963679548,
+          "difference": -0.00020707015975387003,
+          "change_pct": -1.1792020747275478
+        },
+        {
+          "scenario": "building_9001/atlanta_4",
+          "e_sync": 0.010201300717759586,
+          "h_288": 0.010343455817438339,
+          "difference": -0.0001421550996787528,
+          "change_pct": -1.3743482080630032
+        },
+        {
+          "scenario": "building_9001/denver_1",
+          "e_sync": 0.01795161263199795,
+          "h_288": 0.06160401676031618,
+          "difference": -0.04365240412831824,
+          "change_pct": -70.8596718589916
+        },
+        {
+          "scenario": "building_9001/fairbanks_3",
+          "e_sync": 0.014569408871482926,
+          "h_288": 0.06289711201139017,
+          "difference": -0.048327703139907245,
+          "change_pct": -76.83612425822585
+        },
+        {
+          "scenario": "building_9001/phoenix_2",
+          "e_sync": 0.006907579587115719,
+          "h_288": 0.009437308928735691,
+          "difference": -0.0025297293416199716,
+          "change_pct": -26.805621822097937
+        },
+        {
+          "scenario": "building_9001/singapore_2",
+          "e_sync": 0.011904362830595393,
+          "h_288": 0.011775608388881172,
+          "difference": 0.00012875444171422078,
+          "change_pct": 1.0933994869920527
+        },
+        {
+          "scenario": "building_9002/atlanta_4",
+          "e_sync": 0.017917380433048313,
+          "h_288": 0.01783121038361449,
+          "difference": 8.617004943382162e-05,
+          "change_pct": 0.483254067334693
+        },
+        {
+          "scenario": "building_9002/denver_1",
+          "e_sync": 0.024257055366984172,
+          "h_288": 0.056476220717999896,
+          "difference": -0.032219165351015724,
+          "change_pct": -57.04908179301549
+        },
+        {
+          "scenario": "building_9002/fairbanks_3",
+          "e_sync": 0.020988810396677014,
+          "h_288": 0.056464651476139764,
+          "difference": -0.03547584107946275,
+          "change_pct": -62.828407068896475
+        },
+        {
+          "scenario": "building_9002/phoenix_2",
+          "e_sync": 0.015029039960762597,
+          "h_288": 0.01663802516982676,
+          "difference": -0.0016089852090641638,
+          "change_pct": -9.670529961585084
+        },
+        {
+          "scenario": "building_9002/singapore_2",
+          "e_sync": 0.01985976273917508,
+          "h_288": 0.01997680578419358,
+          "difference": -0.00011704304501850005,
+          "change_pct": -0.5858946934905296
+        },
+        {
+          "scenario": "building_9003/atlanta_4",
+          "e_sync": 0.010958033964731348,
+          "h_288": 0.011258435435867135,
+          "difference": -0.0003004014711357871,
+          "change_pct": -2.66823461258896
+        },
+        {
+          "scenario": "building_9003/denver_1",
+          "e_sync": 0.011756124400763266,
+          "h_288": 0.071609509094939,
+          "difference": -0.05985338469417574,
+          "change_pct": -83.58301215949247
+        },
+        {
+          "scenario": "building_9003/fairbanks_3",
+          "e_sync": 0.011009509098301317,
+          "h_288": 0.06870952701412378,
+          "difference": -0.05770001791582246,
+          "change_pct": -83.97673572103295
+        },
+        {
+          "scenario": "building_9003/phoenix_2",
+          "e_sync": 0.007689674665327731,
+          "h_288": 0.010380718104716767,
+          "difference": -0.002691043439389036,
+          "change_pct": -25.923480555418276
+        },
+        {
+          "scenario": "building_9003/singapore_2",
+          "e_sync": 0.011040115606747886,
+          "h_288": 0.0113564564650371,
+          "difference": -0.00031634085828921403,
+          "change_pct": -2.785559556038686
+        }
+      ]
+    }
+  }
+}

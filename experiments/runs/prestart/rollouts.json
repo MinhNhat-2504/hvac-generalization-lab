@@ -1,0 +1,35 @@
+{
+  "results": [
+    {
+      "building": "building_train_7",
+      "weather": "phoenix_3",
+      "policy": "a_start_ctrl",
+      "steps": 8640,
+      "total_reward": -140.04505214563915,
+      "mean_reward": -0.016208918072411937,
+      "prod_regret": -73.40048302114883,
+      "energy_cost": 386.4142760820878,
+      "carbon": 93.60953575660278,
+      "occupied_steps": 3254,
+      "reward_occupied": -117.02960571285803,
+      "reward_unoccupied": -23.01544643278112,
+      "mean_occupancy": 6.769560185185185,
+      "seconds": 189.0779999999795,
+      "error": ""
+    }
+  ],
+  "summary": {
+    "a_start_ctrl": {
+      "score": 0.016208918072411937,
+      "n": 1,
+      "worst": 0.016208918072411937,
+      "worst_scenario": "building_train_7/phoenix_3",
+      "loss_occupied": 117.02960571285803,
+      "loss_unoccupied": 23.01544643278112,
+      "occupied_step_frac": 0.3766203703703704,
+      "w_prod": 0.005097255765357557,
+      "w_energy": 0.008944774909307588,
+      "w_carbon": 0.0021668874017732125
+    }
+  }
+}

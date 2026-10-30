@@ -1,0 +1,217 @@
+{
+  "reference": "h288_full30.json",
+  "temperature_sampling": "8640 points, 300 seconds apart, at the config.gin start timestamp",
+  "correlation": -0.7817965523403576,
+  "scenarios": [
+    {
+      "scenario": "building_train_1/phoenix_5",
+      "mean_outdoor_c": 36.82532407407408,
+      "min_outdoor_c": 25.0,
+      "comfort": 0.002099939462128712,
+      "energy_carbon": 0.02913588978855168
+    },
+    {
+      "scenario": "building_train_1/singapore_8",
+      "mean_outdoor_c": 26.898888888888887,
+      "min_outdoor_c": 23.0,
+      "comfort": 0.003506582115950765,
+      "energy_carbon": 0.011186392875222323
+    },
+    {
+      "scenario": "building_train_1/atlanta_2",
+      "mean_outdoor_c": 14.512303240740739,
+      "min_outdoor_c": -3.9,
+      "comfort": 0.013954670382966708,
+      "energy_carbon": 0.004478395700113138
+    },
+    {
+      "scenario": "building_train_1/denver_7",
+      "mean_outdoor_c": 12.937233796296296,
+      "min_outdoor_c": 0.2,
+      "comfort": 0.022702265696227387,
+      "energy_carbon": 0.003948313179707692
+    },
+    {
+      "scenario": "building_train_1/fairbanks_1",
+      "mean_outdoor_c": -21.42443287037037,
+      "min_outdoor_c": -42.0,
+      "comfort": 0.029672595133888535,
+      "energy_carbon": 0.04718134704019492
+    },
+    {
+      "scenario": "building_train_2/atlanta_3",
+      "mean_outdoor_c": 20.81986689814815,
+      "min_outdoor_c": 8.0,
+      "comfort": 0.004777485712277464,
+      "energy_carbon": 0.005163892582284996
+    },
+    {
+      "scenario": "building_train_4/atlanta_5",
+      "mean_outdoor_c": 26.990266203703705,
+      "min_outdoor_c": 20.0,
+      "comfort": 0.004064575990894608,
+      "energy_carbon": 0.011131768344898868
+    },
+    {
+      "scenario": "building_train_2/phoenix_6",
+      "mean_outdoor_c": 33.14818287037037,
+      "min_outdoor_c": 23.9,
+      "comfort": 0.003406323899424895,
+      "energy_carbon": 0.015472665665090772
+    },
+    {
+      "scenario": "building_train_2/fairbanks_2",
+      "mean_outdoor_c": -8.181157407407406,
+      "min_outdoor_c": -25.6,
+      "comfort": 0.04437766324473261,
+      "energy_carbon": 0.015466444218584037
+    },
+    {
+      "scenario": "building_train_2/singapore_1",
+      "mean_outdoor_c": 27.32978587962963,
+      "min_outdoor_c": 23.5,
+      "comfort": 0.0029135191278555476,
+      "energy_carbon": 0.008866335991956539
+    },
+    {
+      "scenario": "building_train_2/denver_8",
+      "mean_outdoor_c": 6.085399305555556,
+      "min_outdoor_c": -12.8,
+      "comfort": 0.02155528966336937,
+      "energy_carbon": 0.008990026454388905
+    },
+    {
+      "scenario": "building_train_4/denver_2",
+      "mean_outdoor_c": 5.040532407407407,
+      "min_outdoor_c": -10.6,
+      "comfort": 0.04018070137565397,
+      "energy_carbon": 0.008355071860801134
+    },
+    {
+      "scenario": "building_train_4/fairbanks_4",
+      "mean_outdoor_c": 12.490185185185185,
+      "min_outdoor_c": 1.6,
+      "comfort": 0.014462683758195535,
+      "energy_carbon": 0.00517495043572231
+    },
+    {
+      "scenario": "building_train_4/phoenix_8",
+      "mean_outdoor_c": 14.39657986111111,
+      "min_outdoor_c": 2.5,
+      "comfort": 0.015542458748247,
+      "energy_carbon": 0.0049364021386193195
+    },
+    {
+      "scenario": "building_train_4/singapore_3",
+      "mean_outdoor_c": 28.596429398148146,
+      "min_outdoor_c": 23.0,
+      "comfort": 0.0030756262990110942,
+      "energy_carbon": 0.012659581253827368
+    },
+    {
+      "scenario": "building_train_5/atlanta_6",
+      "mean_outdoor_c": 25.42933449074074,
+      "min_outdoor_c": 13.3,
+      "comfort": 0.002353155843420546,
+      "energy_carbon": 0.007622827603129975
+    },
+    {
+      "scenario": "building_train_5/denver_3",
+      "mean_outdoor_c": 11.507268518518519,
+      "min_outdoor_c": -2.8,
+      "comfort": 0.03639529014370055,
+      "energy_carbon": 0.007225484625393653
+    },
+    {
+      "scenario": "building_train_5/fairbanks_5",
+      "mean_outdoor_c": 18.91024884259259,
+      "min_outdoor_c": 10.6,
+      "comfort": 0.004460449519528772,
+      "energy_carbon": 0.0035452490839923325
+    },
+    {
+      "scenario": "building_train_7/atlanta_8",
+      "mean_outdoor_c": 9.65982638888889,
+      "min_outdoor_c": -3.3,
+      "comfort": 0.042664375375898754,
+      "energy_carbon": 0.010746446057855371
+    },
+    {
+      "scenario": "building_train_7/fairbanks_7",
+      "mean_outdoor_c": 6.396614583333334,
+      "min_outdoor_c": -2.8,
+      "comfort": 0.055296204201788185,
+      "energy_carbon": 0.012182429104151045
+    },
+    {
+      "scenario": "building_train_7/denver_5",
+      "mean_outdoor_c": 24.18059606481481,
+      "min_outdoor_c": 12.8,
+      "comfort": 0.004680675337881439,
+      "energy_carbon": 0.008431369580813537
+    },
+    {
+      "scenario": "building_train_5/phoenix_1",
+      "mean_outdoor_c": 13.923524305555556,
+      "min_outdoor_c": 0.4,
+      "comfort": 0.026789209025098695,
+      "energy_carbon": 0.006075644150997079
+    },
+    {
+      "scenario": "building_train_7/phoenix_3",
+      "mean_outdoor_c": 26.98924189814815,
+      "min_outdoor_c": 15.0,
+      "comfort": 0.005490361187580437,
+      "energy_carbon": 0.011062634889915508
+    },
+    {
+      "scenario": "building_train_8/atlanta_1",
+      "mean_outdoor_c": 9.58965277777778,
+      "min_outdoor_c": -1.7,
+      "comfort": 0.02483563746386358,
+      "energy_carbon": 0.008079251521486792
+    },
+    {
+      "scenario": "building_train_8/denver_6",
+      "mean_outdoor_c": 22.101388888888888,
+      "min_outdoor_c": 10.6,
+      "comfort": 0.004630887264200965,
+      "energy_carbon": 0.00726559929233152
+    },
+    {
+      "scenario": "building_train_7/singapore_6",
+      "mean_outdoor_c": 28.115,
+      "min_outdoor_c": 23.0,
+      "comfort": 0.003212793161502342,
+      "energy_carbon": 0.011117644205131746
+    },
+    {
+      "scenario": "building_train_5/singapore_4",
+      "mean_outdoor_c": 28.732552083333335,
+      "min_outdoor_c": 23.1,
+      "comfort": 0.0016527976899708423,
+      "energy_carbon": 0.010671384903967369
+    },
+    {
+      "scenario": "building_train_8/fairbanks_8",
+      "mean_outdoor_c": -10.637239583333335,
+      "min_outdoor_c": -23.9,
+      "comfort": 0.029742985822631452,
+      "energy_carbon": 0.03085700116832464
+    },
+    {
+      "scenario": "building_train_8/phoenix_4",
+      "mean_outdoor_c": 34.371493055555554,
+      "min_outdoor_c": 23.3,
+      "comfort": 0.00215951697905363,
+      "energy_carbon": 0.02203831918956075
+    },
+    {
+      "scenario": "building_train_8/singapore_7",
+      "mean_outdoor_c": 27.51678240740741,
+      "min_outdoor_c": 24.0,
+      "comfort": 0.0022617567135308214,
+      "energy_carbon": 0.010352655517669658
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "candidate": "n_sync_s1",
+  "control": "e_sync",
+  "completed_training_runs": 2,
+  "steps_per_run": 8640,
+  "candidate_summary": {
+    "score": 0.03694393012455424,
+    "n": 2,
+    "worst": 0.05994626388507253,
+    "worst_scenario": "building_train_1/fairbanks_1",
+    "loss_occupied": 315.2287753059063,
+    "loss_unoccupied": 323.16233724639096,
+    "occupied_step_frac": 0.3508101851851852,
+    "w_prod": 0.0017002023017532904,
+    "w_energy": 0.010790756558725897,
+    "w_carbon": 0.024452971280740747
+  },
+  "control_summary": {
+    "score": 0.03643456603408406,
+    "n": 2,
+    "worst": 0.05873990564069337,
+    "worst_scenario": "building_train_1/fairbanks_1",
+    "loss_occupied": 283.2150687666144,
+    "loss_unoccupied": 346.374232302358,
+    "occupied_step_frac": 0.3508101851851852,
+    "w_prod": 0.0012885605698797933,
+    "w_energy": 0.010875814704565437,
+    "w_carbon": 0.024270190770665456
+  },
+  "score_change_pct": 1.3980243101940015,
+  "unoccupied_loss_change_pct": -6.701391989143357,
+  "occupied_loss_change_pct": 11.303673451666874,
+  "advance_to_dev": false,
+  "note": "Training gate chosen before results. No new dev or hot-control rollout is needed if the candidate fails this gate."
+}

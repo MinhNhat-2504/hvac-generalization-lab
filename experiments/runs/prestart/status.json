@@ -1,0 +1,14 @@
+{
+  "status": "complete",
+  "stage": "hypothesis_not_supported",
+  "completed": 1,
+  "failed": [],
+  "waiting_for_memory": false,
+  "active": [],
+  "decision": {
+    "first_two_hours_comfort_share": 0.12004407059406479,
+    "diagnostic_supports_morning": false,
+    "stop_reason": "first-two-hour comfort share below 25%; do not run the proposed prestart sweep"
+  },
+  "updated_at": "2026-10-28T14:02:39+0700"
+}

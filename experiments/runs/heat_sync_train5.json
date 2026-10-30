@@ -1,0 +1,103 @@
+{
+  "results": [
+    {
+      "building": "building_train_1",
+      "weather": "fairbanks_1",
+      "policy": "e_sync",
+      "steps": 8640,
+      "total_reward": -507.5127847355907,
+      "mean_reward": -0.05873990564069337,
+      "prod_regret": -35.14193023378175,
+      "energy_cost": 748.6053251897247,
+      "carbon": 1683.532808666736,
+      "occupied_steps": 2964,
+      "reward_occupied": -237.1660561002791,
+      "reward_unoccupied": -270.3467286353116,
+      "mean_occupancy": 13.433564814814815,
+      "seconds": 455.39950728416443,
+      "error": ""
+    },
+    {
+      "building": "building_train_2",
+      "weather": "fairbanks_2",
+      "policy": "e_sync",
+      "steps": 8640,
+      "total_reward": -143.908044568092,
+      "mean_reward": -0.016656023676862503,
+      "prod_regret": -9.31530042116242,
+      "energy_cost": 223.3605446771544,
+      "carbon": 468.23377753484965,
+      "occupied_steps": 3120,
+      "reward_occupied": -61.71217651758343,
+      "reward_unoccupied": -82.19586805050858,
+      "mean_occupancy": 30.86423611111111,
+      "seconds": 731.8117620944977,
+      "error": ""
+    },
+    {
+      "building": "building_train_4",
+      "weather": "denver_2",
+      "policy": "e_sync",
+      "steps": 8640,
+      "total_reward": -86.85657481764974,
+      "mean_reward": -0.01005284430759835,
+      "prod_regret": -5.586120375028386,
+      "energy_cost": 140.1849037563552,
+      "carbon": 277.3396090846363,
+      "occupied_steps": 3273,
+      "reward_occupied": -34.25960590085015,
+      "reward_unoccupied": -52.5969689167996,
+      "mean_occupancy": 10.374074074074073,
+      "seconds": 553.2042498588562,
+      "error": ""
+    },
+    {
+      "building": "building_train_7",
+      "weather": "atlanta_8",
+      "policy": "e_sync",
+      "steps": 8640,
+      "total_reward": -112.90838641832306,
+      "mean_reward": -0.013068100279898503,
+      "prod_regret": -4.991703294018436,
+      "energy_cost": 185.77256998517987,
+      "carbon": 363.7942523921374,
+      "occupied_steps": 3098,
+      "reward_occupied": -36.48388731316663,
+      "reward_unoccupied": -76.42449910515643,
+      "mean_occupancy": 6.461226851851852,
+      "seconds": 239.00268459320068,
+      "error": ""
+    },
+    {
+      "building": "building_train_7",
+      "weather": "fairbanks_7",
+      "policy": "e_sync",
+      "steps": 8640,
+      "total_reward": -122.07651633338173,
+      "mean_reward": -0.014129226427474738,
+      "prod_regret": -1.9686141787562974,
+      "energy_cost": 191.06506528472892,
+      "carbon": 413.41167391875933,
+      "occupied_steps": 3098,
+      "reward_occupied": -46.04901266633533,
+      "reward_unoccupied": -76.0275036670464,
+      "mean_occupancy": 6.461226851851852,
+      "seconds": 239.4619209766388,
+      "error": ""
+    }
+  ],
+  "summary": {
+    "e_sync": {
+      "score": 0.022529220066505495,
+      "n": 5,
+      "worst": 0.05873990564069337,
+      "worst_scenario": "building_train_1/fairbanks_1",
+      "loss_occupied": 415.67073849821463,
+      "loss_unoccupied": 557.5915683748226,
+      "occupied_step_frac": 0.3600231481481482,
+      "w_prod": 0.0007917176180937122,
+      "w_energy": 0.006893464855986773,
+      "w_carbon": 0.01484403759998666
+    }
+  }
+}

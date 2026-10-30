@@ -1,0 +1,28 @@
+{
+  "task": {
+    "split": "dev",
+    "policy": "cpi_400",
+    "building": "building_9001",
+    "weather": "fairbanks_3",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/holdout_scenarios/dev"
+  },
+  "fingerprint": "8848adf032a088533f4e8f25de079a852d9a6fce5af69a2eb99eba2ac03c030f",
+  "result": {
+    "building": "building_9001",
+    "weather": "fairbanks_3",
+    "policy": "cpi_400",
+    "steps": 8640,
+    "total_reward": -125.87969264961248,
+    "mean_reward": -0.014569408871482926,
+    "prod_regret": -11.169984565566665,
+    "energy_cost": 184.39657188803176,
+    "carbon": 411.4919376377675,
+    "occupied_steps": 3271,
+    "reward_occupied": -57.70120784989558,
+    "reward_unoccupied": -68.1784847997169,
+    "mean_occupancy": 7.817939814814815,
+    "seconds": 373.5639019012451,
+    "error": ""
+  }
+}
