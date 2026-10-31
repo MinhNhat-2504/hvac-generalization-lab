@@ -1,0 +1,28 @@
+{
+  "task": {
+    "split": "training",
+    "policy": "valve8_gentle",
+    "building": "building_train_5",
+    "weather": "phoenix_1",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/training_scenarios"
+  },
+  "fingerprint": "a8bd8933710d91ac342f6704e1422acf41cc5cebfa435edd2d07bfce74f170ad",
+  "result": {
+    "building": "building_train_5",
+    "weather": "phoenix_1",
+    "policy": "valve8_gentle",
+    "steps": 8640,
+    "total_reward": -62.51807019154057,
+    "mean_reward": -0.007235887753650529,
+    "prod_regret": -23.10065949562653,
+    "energy_cost": 96.94632240394094,
+    "carbon": 146.34205014266627,
+    "occupied_steps": 3121,
+    "reward_occupied": -34.99821183871245,
+    "reward_unoccupied": -27.519858352828123,
+    "mean_occupancy": 29.404282407407408,
+    "seconds": 645.4903364181519,
+    "error": ""
+  }
+}

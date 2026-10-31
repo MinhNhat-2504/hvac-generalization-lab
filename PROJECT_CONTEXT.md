@@ -50,9 +50,15 @@ workspace parent contains `.venv`. Run commands here using
   passed again after final baseline-validation/manifest changes. Old V4/V5/V6
   artifacts match their assemblies. Full generated notebook-wrapper tests
   check actions and the new runtime variant/source-LF-hash log marker.
-- Latest V8 check (2026-10-31 04:24): running full dev, 6/60 dev rollouts
-  plus one matching V4 control complete; three active workers, no failures.
-  Read live status/processes for newer counts. Its desktop notifier is watching.
+- V8 completed 2026-10-31 10:35: 91 full episodes, no errors. Selected
+  `valve8_gentle` (valve exponent .75), training mean .0143645138 (-.6187%
+  versus V4), dev mean .0164503660 (-1.4027%). Training improves 14 cases,
+  regresses 15, ties one; dev improves 12, regresses eight. Comfort penalties
+  rise slightly; energy/carbon savings produce the mean improvement.
+- Verified notebook: `experiments/submission/valve8_gentle/submission.ipynb`;
+  action parity 1,152 real-observation pairs, notebook SHA matches validation,
+  variant/source-LF-hash startup marker present. Paper PDF includes both full
+  cohort scores. This is an experimental candidate, not a Kaggle improvement.
 - At most three workers; launch requires 1.75 GiB available RAM and 1 GiB disk.
   Low memory has repeatedly delayed launches. D: previously filled; user
   freed space. Resume matching saved records rather than restarting from zero.
@@ -60,12 +66,19 @@ workspace parent contains `.venv`. Run commands here using
   `-RunRelativePath experiments\runs\split_geometry_calibration`.
   Do not promise unsolicited future chat messages. PC must remain awake.
 - V7 builds paper separately and replaces published PDF only after success.
-- Next: run the V4-based valve study when memory permits, retain V4 as the
-  organizer reference, and verify runtime variant/source markers in future
-  Kaggle logs. Actual uploaded V6/runtime remains unverified. V7 negative
-  results and the new V8 protocol remain in separate paper additions.
+- Next: provide the verified valve notebook for user submission and compare
+  its startup variant/source marker in Kaggle logs before interpreting the
+  score. Retain V4 as organizer reference until a lower public score arrives.
+  Actual uploaded V6/runtime remains unverified. Preserve all prior results.
 - User explicitly requested commits and a push to GitHub. Remote main was
   fetched and verified to be an ancestor of local main; use a normal push,
   never force. Publish source/tests, completed results/provenance and additive
   paper updates. Ignore machine-local logs/locks/notices, test fixtures and
   active V8 result files; publish its frozen protocol only until completion.
+- Publication verified: three new commits pushed normally to `origin/main`:
+  `2b15ea2` (source/tests), `148501e` (completed results/provenance),
+  `8c71a32` (paper/docs). Remote main equals full local HEAD
+  `8c71a326ec18f906b378ba87fa6bd0d64b17e0ca`. All 94 tests passed again.
+  Active V8 continued at 8/60 dev plus control, three workers, no errors;
+  frozen source hashes remained unchanged. Live paper tables and this local
+  context can differ from the published snapshot as execution progresses.

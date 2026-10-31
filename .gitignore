@@ -79,11 +79,6 @@ experiments/runs/**/completion_notice.json
 experiments/runs/**/retired_notification_helpers.json
 experiments/runs/**/attempts.jsonl
 
-# The active study is not a finished measurement record. Publish its frozen
-# protocol now and add its results after the study completes.
-experiments/runs/reheat_curve_calibration/*
-!experiments/runs/reheat_curve_calibration/protocol.json
-
 # Filesystem fixtures from local tests, including inaccessible empty temp dirs.
 tests/tmp*/
 tests/coverage_test_*/
