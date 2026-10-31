@@ -616,3 +616,46 @@ inputs, memory/disk launch checks, checkpoints and atomic PDF replacement
 accompany the new study.
 
 \input{reheat_curve_calibration_results}
+
+\subsection{Global-curve completion and conditional reheat follow-up}
+The global valve-curve study completed 91 valid full episodes. Selected
+\texttt{valve8\_gentle} ($p=0.75$) reached training mean $0.0143645138$
+($-0.619\%$ versus V4) and dev mean $0.0164503660$ ($-1.403\%$).
+It improves 14 training cases, regresses 15 and ties one; dev improves 12
+and regresses eight. Energy/carbon reductions outweigh small increases in
+mean comfort penalty. Standalone actions matched 1,152 real-observation pairs.
+The user submitted this candidate as Kaggle notebook Version 7; its organizer
+score is pending. Internal experiment labels do not denote Kaggle notebook
+version numbers. The earlier local \texttt{geo7} rejection is a different study.
+V4 remains the best known organizer-scored controller.
+
+Weather-group summaries motivate but do not identify a mechanism: training
+Fairbanks improves $2.742\%$ while training Phoenix worsens $1.122\%$, yet
+dev Phoenix improves $3.004\%$. The next fixed study therefore uses observable
+operating conditions, never a weather/building label. For unchanged V4 zone
+demand $h=\max(0,-u)$, command valve opening
+$h+w(h^{0.75}-h)$. Test (i) $w=1$ only when the final same-step AHU command is
+running with positive normalized SAT; (ii)
+$w=\operatorname{clip}((T_{\mathrm{low}}-T_{\mathrm{obs}})/0.5,0,1)$; and
+(iii) the second weight only when the first command condition holds.
+This command sign is a mode proxy, not measured supply-air temperature or
+proof that the AHU adds heat. The inherited observation delay remains;
+the policy does not read simulator state or reward.
+
+The gate runs after parent coordination and hold logic, using that step's
+final commands. Fixed-observation PI states/demands, damper and all plant
+controls remain V4, with zero/full valve authority retained. Future feedback
+may still change those commands through changed temperatures. Outside active
+PI, V4 is inherited unchanged; no geometry dependence is introduced.
+
+Two fresh full controls on \texttt{building\_train\_1/fairbanks\_1} must
+reproduce V4 ($w=0$) and the submitted curve ($w=1$). All three gates then
+receive all 20 dev scenarios. Candidates beating both full-dev reference
+means receive all 30 training scenarios in rank order; packaging requires
+both complete means below both references by more than $10^{-10}$, followed
+by standalone verification. The maximum is 152 new episodes before those
+checks. Regression details remain visible, repeated tuning is exploratory,
+the test split stays unused, and organizer superiority requires a Kaggle score.
+All preceding data and artifacts remain preserved.
+
+\input{gated_reheat_calibration_results}

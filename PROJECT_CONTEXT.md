@@ -59,6 +59,22 @@ workspace parent contains `.venv`. Run commands here using
   action parity 1,152 real-observation pairs, notebook SHA matches validation,
   variant/source-LF-hash startup marker present. Paper PDF includes both full
   cohort scores. This is an experimental candidate, not a Kaggle improvement.
+- User uploaded `valve8_gentle` as Kaggle notebook Version 7; its score is
+  pending. Kaggle notebook version numbers differ from internal study labels
+  (`geo7_*` was a rejected local study, not this submitted notebook).
+- New conditional-curve follow-up: `hvaclab/gated_reheat_calibration.py`,
+  outputs `experiments/runs/gated_reheat_calibration`. Test .75 valve boost
+  gated by the final current-step positive-SAT running AHU command, a continuous
+  cold-zone blend (full at .5 K below the low comfort edge), or both. No labels
+  or geometry. Require full means below V4 AND submitted `valve8_gentle`.
+- 104 tests passed; old submitted assemblies unchanged. Two fresh full controls
+  on building_train_1/fairbanks_1 must reproduce V4 and the global curve before
+  60 dev episodes and ranked 30-case training checks. Maximum 152 episodes.
+- Current follow-up: first control worker consuming CPU, 0 completed, no errors;
+  scheduler may wait for RAM before adding workers. Original 1.75 GiB threshold
+  and frozen source hashes preserved. A proposed lower first-worker threshold
+  was withdrawn when the original study started; do not assume an r2 run exists.
+  Desktop completion watcher is active. Paper additions preserve all old data.
 - At most three workers; launch requires 1.75 GiB available RAM and 1 GiB disk.
   Low memory has repeatedly delayed launches. D: previously filled; user
   freed space. Resume matching saved records rather than restarting from zero.
@@ -66,9 +82,9 @@ workspace parent contains `.venv`. Run commands here using
   `-RunRelativePath experiments\runs\split_geometry_calibration`.
   Do not promise unsolicited future chat messages. PC must remain awake.
 - V7 builds paper separately and replaces published PDF only after success.
-- Next: provide the verified valve notebook for user submission and compare
-  its startup variant/source marker in Kaggle logs before interpreting the
-  score. Retain V4 as organizer reference until a lower public score arrives.
+- Next: finish the conditional-curve study, obtain the submitted global-curve
+  Kaggle score and check its startup variant/source marker before interpreting
+  it. Retain V4 as organizer reference until a lower public score arrives.
   Actual uploaded V6/runtime remains unverified. Preserve all prior results.
 - User explicitly requested commits and a push to GitHub. Remote main was
   fetched and verified to be an ancestor of local main; use a normal push,
@@ -82,3 +98,4 @@ workspace parent contains `.venv`. Run commands here using
   Active V8 continued at 8/60 dev plus control, three workers, no errors;
   frozen source hashes remained unchanged. Live paper tables and this local
   context can differ from the published snapshot as execution progresses.
+- Completed V8 results/paper were subsequently pushed as `aed0551`.

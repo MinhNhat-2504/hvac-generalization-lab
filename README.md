@@ -56,6 +56,13 @@ adds a runtime variant/source marker for Kaggle log checks. See the
 [study results](reports/REHEAT_CURVE_REVIEW.md); a local pass cannot establish
 an organizer improvement.
 
+The user has submitted `valve8_gentle` as Kaggle notebook **Version 7**;
+organizer score pending. Internal study labels differ from Kaggle notebook
+versions. The next [conditional reheat study](reports/GATED_REHEAT_PROTOCOL.md)
+tests command-mode and cold-zone gates, and requires complete local means
+below both V4 and the submitted global curve. See its
+[recorded results](reports/GATED_REHEAT_REVIEW.md). Earlier results are retained.
+
 The comfort term is **occupancy-weighted**, and the weighting is applied as a
 hard gate. From `smart_control/reward/base_setpoint_energy_carbon_reward.py`:
 

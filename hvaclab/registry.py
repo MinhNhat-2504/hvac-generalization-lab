@@ -31,6 +31,7 @@ _OURS: dict[str, tuple[str, str]] = {
     "geometry_pi": ("hvaclab.policies.geometry_pi", "GeometryPIPolicy"),
     "split_geometry_pi": ("hvaclab.policies.split_geometry_pi", "SplitGeometryPIPolicy"),
     "reheat_curve": ("hvaclab.policies.reheat_curve", "ReheatCurvePolicy"),
+    "gated_reheat": ("hvaclab.policies.gated_reheat", "GatedReheatPolicy"),
 }
 
 # Parameter variants, for ablation. Each entry is (policy key, kwargs).
@@ -596,3 +597,10 @@ for _key, _power in (("valve8_ctrl", 1.), ("valve8_sqrt", .5),
                       ("valve8_gentle", .75), ("valve8_soft", 1.5)):
     _VARIANTS[_key] = ("reheat_curve", {**_BEST288, "coordinate_water": True,
                                       "reheat_exponent": _power})
+
+for _key, _mode in (("valve9_ctrl","off"),("valve9_curve_ctrl","all"),
+                    ("valve9_heat","heating"),("valve9_cold","cold"),
+                    ("valve9_heat_cold","heating_cold")):
+    _VARIANTS[_key] = ("gated_reheat", {**_BEST288,"coordinate_water":True,
+                                      "reheat_exponent":.75,"curve_mode":_mode,
+                                      "cold_full_k":.5})

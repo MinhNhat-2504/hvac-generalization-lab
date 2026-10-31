@@ -27,7 +27,8 @@ GEOMETRY_PI = ("geo_ctrl", "geo_p_sqrt", "geo_pi_sqrt", "geo_p_linear",
                "geo6_ctrl", "geo6_quarter", "geo6_threequarter", "geo6_linear")
 SPLIT_GEOMETRY_PI = ("geo7_ctrl", "geo7_soft_i", "geo7_strong_i", "geo7_soft_p")
 REHEAT_CURVE = ("valve8_ctrl", "valve8_sqrt", "valve8_gentle", "valve8_soft")
-SUPPORTED = ("e_sync", "e_guard_air", "e_guard_sync", "n_sync_s1") + SCHEDULED + GUARDED_PUMP + HEATING_PUMP + PRESTART + COOLING_PRESSURE + FLOW_BALANCED + PI_CALIBRATION + GEOMETRY_PI + SPLIT_GEOMETRY_PI + REHEAT_CURVE
+GATED_REHEAT = ("valve9_ctrl","valve9_curve_ctrl","valve9_heat","valve9_cold","valve9_heat_cold")
+SUPPORTED = ("e_sync", "e_guard_air", "e_guard_sync", "n_sync_s1") + SCHEDULED + GUARDED_PUMP + HEATING_PUMP + PRESTART + COOLING_PRESSURE + FLOW_BALANCED + PI_CALIBRATION + GEOMETRY_PI + SPLIT_GEOMETRY_PI + REHEAT_CURVE + GATED_REHEAT
 SOURCES = (
     "smart_buildings/baselines/pid.py",
     "smart_buildings/baselines/pid_plus.py",
@@ -41,6 +42,8 @@ SOURCES = (
 
 
 def variant_sources(key):
+    if key in GATED_REHEAT:
+        return SOURCES+("hvaclab/policies/gated_reheat.py",)
     if key in REHEAT_CURVE:
         return SOURCES + ("hvaclab/policies/reheat_curve.py",)
     if key in SPLIT_GEOMETRY_PI:
@@ -79,7 +82,8 @@ def assemble_variant(key):
                 for i in range(node.lineno - 1, node.end_lineno):
                     lines[i] = ""
         parts.append(f"\n# Source: {relative}\n" + "".join(lines))
-    parent = ("ReheatCurvePolicy" if key in REHEAT_CURVE else
+    parent = ("GatedReheatPolicy" if key in GATED_REHEAT else
+              "ReheatCurvePolicy" if key in REHEAT_CURVE else
               "SplitGeometryPIPolicy" if key in SPLIT_GEOMETRY_PI else
               "GeometryPIPolicy" if key in GEOMETRY_PI else
               "FlowBalancedCoolingPolicy" if key in FLOW_BALANCED else
@@ -128,7 +132,7 @@ def notebook_template(source,key):
     template=(f"# Experimental candidate: {key}\n"
               "# No leaderboard claim. See reports/HEAT_SYNC_REVIEW.md.\n\n"
               +NOTEBOOK_CELL[NOTEBOOK_CELL.index("import sys"):])
-    if key in REHEAT_CURVE:
+    if key in REHEAT_CURVE+GATED_REHEAT:
         marker=(f"HVAC_SUBMISSION variant={key} "
                 f"source_lf_sha256={hashlib.sha256(source.encode('utf-8')).hexdigest()}")
         template=template.replace("class SubmissionPolicy(",
@@ -162,7 +166,7 @@ def main():
                     policy_sha256=hashlib.sha256((out / "submission_policy.py").read_bytes()).hexdigest(),
                     sources={p: hashlib.sha256((REPO / p).read_bytes()).hexdigest()
                              for p in variant_sources(args.variant)})
-    if args.variant in REHEAT_CURVE:
+    if args.variant in REHEAT_CURVE+GATED_REHEAT:
         manifest["runtime_source_lf_sha256"]=hashlib.sha256(source.encode("utf-8")).hexdigest()
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print(f"wrote {out.relative_to(REPO)}")

@@ -79,6 +79,10 @@ experiments/runs/**/completion_notice.json
 experiments/runs/**/retired_notification_helpers.json
 experiments/runs/**/attempts.jsonl
 
+# Publish active-study protocol only; add its measurement records on completion.
+experiments/runs/gated_reheat_calibration/*
+!experiments/runs/gated_reheat_calibration/protocol.json
+
 # Filesystem fixtures from local tests, including inaccessible empty temp dirs.
 tests/tmp*/
 tests/coverage_test_*/
