@@ -109,6 +109,12 @@ Older best/pending statements below are historical; current target is <0.01922.
   is watching. Ten gated-policy/workflow tests passed again after setup.
 
 ## Independent supervision (2026-11-01)
+- User authorized automatic sequential execution of the prepared release study.
+  Detached `hold_release_queue` waits for persistence completion and scheduler
+  exit, then prepares/supervises `hold_release_calibration`. Child-local entry
+  adapter leaves shared registry/builder unchanged. Require full means below
+  V7/V4 and any selected persistence winner. Latest training count 11/30;
+  three active workers. No second-study rollout started yet.
 - 2026-11-02: user explicitly requested restart of persistence study; stopped
   supervisor via stop marker, terminated only its scheduler/worker subtree,
   preserved all 66 results, relaunched independent supervisor. Latest count

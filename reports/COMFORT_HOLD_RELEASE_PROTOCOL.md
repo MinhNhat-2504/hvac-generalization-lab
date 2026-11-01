@@ -61,3 +61,16 @@ a score below .01922.
 release, warm reset, nonfinite/inactive/hot-reserve veto and preservation of
 new parent cooling/heating requests. No registry/builder or existing scheduler
 was changed to introduce this candidate, and no performance rollout has started.
+
+## Automatic sequential queue
+
+User authorized automatic execution after persistence validation. The detached
+`hvaclab.hold_release_queue` waits for status complete and scheduler exit, then
+prepares the next frozen protocol and independently supervises the release
+study. A preceding failure does not trigger the next study. Child-local
+registration/assembly in `hold_release_entry` leaves shared registry and builder
+unchanged. Compare also with any selected full-cohort persistence winner.
+Launch with `reports/scripts/start_hold_release_queue.ps1`. State/logs live in
+`experiments/runs/hold_release_calibration`; ordinary resource checks, locking,
+orphan-worker wait and bounded retries apply. No concurrent rollout is opened.
+Reboot/logoff still requires restarting the queue launcher.
