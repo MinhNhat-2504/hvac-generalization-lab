@@ -68,6 +68,13 @@ running gated-reheat scheduler, record exits and restart from saved episodes.
 Launch with `powershell -NoProfile -File reports/scripts/start_study_supervisor.ps1`.
 It does not register Windows startup or prevent sleep.
 
+2026-11-01: Kaggle Version 7 / `valve8_gentle` is the best reported public
+score, **0.01922**. Conditional reheat gates completed 62 episodes and all
+failed dev versus Version 7; no replacement notebook was produced.
+The next [persistence study](reports/PERSISTENCE_PROTOCOL.md) tests 12/36/48-hour
+cooling holds against Version 7's 24 hours while retaining its valve curve.
+See [results](reports/PERSISTENCE_REVIEW.md). Earlier measurements stay retained.
+
 The comfort term is **occupancy-weighted**, and the weighting is applied as a
 hard gate. From `smart_control/reward/base_setpoint_energy_carbon_reward.py`:
 

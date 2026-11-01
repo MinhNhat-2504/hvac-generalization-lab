@@ -604,3 +604,9 @@ for _key, _mode in (("valve9_ctrl","off"),("valve9_curve_ctrl","all"),
     _VARIANTS[_key] = ("gated_reheat", {**_BEST288,"coordinate_water":True,
                                       "reheat_exponent":.75,"curve_mode":_mode,
                                       "cold_full_k":.5})
+
+# Full-day persistence on the organizer-confirmed Version 7 valve curve.
+for _key, _steps in (("persist_ctrl",288),("persist_144",144),
+                      ("persist_432",432),("persist_576",576)):
+    _VARIANTS[_key] = ("reheat_curve",{**_BEST288,"coordinate_water":True,
+                                      "reheat_exponent":.75,"hold_steps":_steps})

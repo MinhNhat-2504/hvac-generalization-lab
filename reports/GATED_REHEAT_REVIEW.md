@@ -1,16 +1,136 @@
 # Conditional reheat-curve study
 
-Status: running; stage: reference_control.
+Status: complete; stage: finished.
 
 All scores use complete 8,640-step episodes against matched submitted-curve references; V4 is checked separately.
 
 | Cohort | Variant | n | Submitted curve | Candidate | Change |
 |---|---|---:|---:|---:|---:|
+| full dev | valve9_heat | 20 | 0.01645037 | 0.01650237 | +0.32% |
+| full dev | valve9_cold | 20 | 0.01645037 | 0.01667351 | +1.36% |
+| full dev | valve9_heat_cold | 20 | 0.01645037 | 0.01664084 | +1.16% |
 
 Decision:
 
 ```json
-{}
+{
+  "unchanged_v4_full_episode_parity": true,
+  "unchanged_curve_full_episode_parity": true,
+  "full_dev_calibration": {
+    "valve9_heat": {
+      "n": 20,
+      "score": 0.0165023732780026,
+      "submitted_curve": 0.01645036602119071,
+      "e_sync": 0.016684401534295998,
+      "change_vs_v4_pct": -1.0910086041697409,
+      "change_pct": 0.3161465024237087,
+      "worst_ratio": 1.079456638834656,
+      "improved": 10,
+      "regressed": 10,
+      "largest_increases": [
+        {
+          "scenario": "building_9000/phoenix_2",
+          "score": 0.011038663138469613,
+          "submitted_curve": 0.01022612927776939,
+          "difference": 0.0008125338607002236
+        },
+        {
+          "scenario": "building_9003/fairbanks_3",
+          "score": 0.010993297292184968,
+          "submitted_curve": 0.010622402266435486,
+          "difference": 0.00037089502574948197
+        },
+        {
+          "scenario": "building_9003/atlanta_4",
+          "score": 0.01094544357441765,
+          "submitted_curve": 0.010720557629305618,
+          "difference": 0.00022488594511203136
+        }
+      ],
+      "comfort": 0.003457715557979061,
+      "energy": 0.0065263029653033055,
+      "carbon": 0.006518354754334969,
+      "passes": false
+    },
+    "valve9_cold": {
+      "n": 20,
+      "score": 0.01667351458283945,
+      "submitted_curve": 0.01645036602119071,
+      "e_sync": 0.016684401534295998,
+      "change_vs_v4_pct": -0.06525227431243286,
+      "change_pct": 1.356496027877374,
+      "worst_ratio": 1.0629053922656613,
+      "improved": 5,
+      "regressed": 15,
+      "largest_increases": [
+        {
+          "scenario": "building_9000/denver_1",
+          "score": 0.04124400735160331,
+          "submitted_curve": 0.040317059829980434,
+          "difference": 0.0009269475216228742
+        },
+        {
+          "scenario": "building_9000/phoenix_2",
+          "score": 0.010869407951346837,
+          "submitted_curve": 0.01022612927776939,
+          "difference": 0.0006432786735774479
+        },
+        {
+          "scenario": "building_9000/fairbanks_3",
+          "score": 0.03527351350348277,
+          "submitted_curve": 0.03465875094306057,
+          "difference": 0.0006147625604221996
+        }
+      ],
+      "comfort": 0.0034520639651779194,
+      "energy": 0.006572991213186402,
+      "carbon": 0.006648459403720874,
+      "passes": false
+    },
+    "valve9_heat_cold": {
+      "n": 20,
+      "score": 0.01664084362887178,
+      "submitted_curve": 0.01645036602119071,
+      "e_sync": 0.016684401534295998,
+      "change_vs_v4_pct": -0.26106963042504816,
+      "change_pct": 1.1578928239998065,
+      "worst_ratio": 1.0716845510656978,
+      "improved": 7,
+      "regressed": 13,
+      "largest_increases": [
+        {
+          "scenario": "building_9000/denver_1",
+          "score": 0.0412444471723541,
+          "submitted_curve": 0.040317059829980434,
+          "difference": 0.0009273873423736659
+        },
+        {
+          "scenario": "building_9000/phoenix_2",
+          "score": 0.010959184764186076,
+          "submitted_curve": 0.01022612927776939,
+          "difference": 0.0007330554864166863
+        },
+        {
+          "scenario": "building_9000/fairbanks_3",
+          "score": 0.03527421403031044,
+          "submitted_curve": 0.03465875094306057,
+          "difference": 0.0006154630872498706
+        }
+      ],
+      "comfort": 0.0034090267296963523,
+      "energy": 0.006579560624925306,
+      "carbon": 0.006652256273218237,
+      "passes": false
+    }
+  },
+  "ranked_candidates": {
+    "1": []
+  },
+  "full_trials": {},
+  "calibration_batch": 1,
+  "eligible_for_packaging": false,
+  "stop_reason": "no gate beat both references on both full means; retain existing submissions"
+}
 ```
 
 Earlier paper sections and artifacts remain unchanged. Percentages compare with the submitted curve; JSON also reports V4. Selection requires full-cohort means below BOTH V4 and the submitted curve. Full-training failures remain recorded while the next dev-ranked candidate is tried.

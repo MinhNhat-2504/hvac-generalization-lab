@@ -26,7 +26,8 @@ PI_CALIBRATION = ("pi_cal_ctrl", "pi_cal_slow_i", "pi_cal_fast_i", "pi_cal_soft_
 GEOMETRY_PI = ("geo_ctrl", "geo_p_sqrt", "geo_pi_sqrt", "geo_p_linear",
                "geo6_ctrl", "geo6_quarter", "geo6_threequarter", "geo6_linear")
 SPLIT_GEOMETRY_PI = ("geo7_ctrl", "geo7_soft_i", "geo7_strong_i", "geo7_soft_p")
-REHEAT_CURVE = ("valve8_ctrl", "valve8_sqrt", "valve8_gentle", "valve8_soft")
+REHEAT_CURVE = ("valve8_ctrl", "valve8_sqrt", "valve8_gentle", "valve8_soft",
+                "persist_ctrl","persist_144","persist_432","persist_576")
 GATED_REHEAT = ("valve9_ctrl","valve9_curve_ctrl","valve9_heat","valve9_cold","valve9_heat_cold")
 SUPPORTED = ("e_sync", "e_guard_air", "e_guard_sync", "n_sync_s1") + SCHEDULED + GUARDED_PUMP + HEATING_PUMP + PRESTART + COOLING_PRESSURE + FLOW_BALANCED + PI_CALIBRATION + GEOMETRY_PI + SPLIT_GEOMETRY_PI + REHEAT_CURVE + GATED_REHEAT
 SOURCES = (

@@ -150,7 +150,13 @@ class Supervisor:
 
 
 def main():
-    argparse.ArgumentParser(description=__doc__).parse_args()
+    global RUN,MODULE
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--study',choices=('gated_reheat_calibration','persistence_calibration'),
+                        default='gated_reheat_calibration')
+    args=parser.parse_args()
+    RUN=REPO/'experiments/runs'/args.study
+    MODULE='hvaclab.'+args.study
     RUN.mkdir(parents=True,exist_ok=True)
     with RunLock(RUN/'supervisor.lock'):
         supervisor=Supervisor()

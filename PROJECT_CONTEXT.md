@@ -109,6 +109,23 @@ Older best/pending statements below are historical; current target is <0.01922.
   is watching. Ten gated-policy/workflow tests passed again after setup.
 
 ## Independent supervision (2026-11-01)
+- New persistence study: `hvaclab/persistence_calibration.py`, directory
+  `experiments/runs/persistence_calibration`, full cooling hold 144/432/576
+  steps against V7's 288, global valve exponent .75 unchanged. Fresh full V7
+  control; all 20 dev for three arms, ranked 30 training checks. Require both
+  complete means below V7 and V4 before packaging. Maximum 151 episodes.
+- 116 tests passed; V7 artifact unchanged; paper PDF rebuilt with conditional
+  gate negative results and new prospective section. Independent supervisor
+  started using `-Study persistence_calibration`; notifier watching. Latest
+  setup: waiting for RAM (~.83 GiB versus required 1.75), no rollouts yet.
+- Supervisor/launcher now accept an allowlisted study selector (default gated
+  reheat, or persistence_calibration). Existing seven supervisor tests pass.
+- Conditional-curve study completed 2026-11-01 20:43 (Asia/Saigon): 62 valid
+  episodes (two controls plus 60 dev), zero errors. All gates failed against
+  submitted valve8_gentle on full dev: heat +.3161%, cold +1.3565%, heat+cold
+  +1.1579%. No training launched and no new notebook packaged. Supervisor
+  correctly recorded completion and exited; no restart was needed after adoption.
+  Kaggle Version 7 / valve8_gentle remains best reported public score .01922.
 - User requested robust background supervision. Added `hvaclab/supervisor.py`
   and hidden independent launcher `reports/scripts/start_study_supervisor.ps1`.
   Launched outside the tool session, verified alive and adopting existing

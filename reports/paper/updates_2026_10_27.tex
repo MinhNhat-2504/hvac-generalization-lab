@@ -675,3 +675,32 @@ with bounded retry backoff. A real child-process crash/retry test complements
 duplicate-launch and input/resource-gate tests. This improves execution
 continuity, not controller performance. It does not prevent system sleep or
 automatically start after reboot; those remain operational limitations.
+
+\subsection{Conditional-curve rejection and Version 7 persistence study}
+The conditional-curve study completed 62 valid episodes: two full reproduction
+controls and 60 dev episodes. Relative to Version 7's global curve, the
+command-mode, cold-zone and combined gates increased full-dev means by
+$0.316\%$, $1.356\%$ and $1.158\%$. All failed the predeclared dev gate;
+no training or notebook packaging followed. The preceding table and all
+earlier results remain retained. Version 7 remains best at $0.01922$ publicly.
+
+The next fixed study keeps that global $h^{0.75}$ valve curve and changes only
+cooling-run persistence: 144, 432 or 576 five-minute steps (12, 36, 48 hours),
+against the unchanged 288-step (24-hour) reference. The existing timer refreshes
+on each new cooling request and cancels on a heating request; the duration
+is persistence after the latest cooling call, not a total-run-length cap.
+This differs from earlier off-window-only hold tests. Shorter persistence
+may save ventilation, while longer persistence may preserve delivery;
+both directions require measurement. Other PI, damper, plant and schedule
+settings remain Version 7. No geometry or scenario identifiers choose actions.
+
+A fresh full Version 7 control must reproduce its cached reward. All three
+candidates receive all 20 dev episodes; eligible candidates then receive all
+30 training episodes in rank order. Both complete means must beat Version 7
+and V4 by more than $10^{-10}$ before packaging and standalone verification.
+The maximum is 151 new full episodes before verification. Individual regressions
+remain visible. Repeated local tuning is exploratory, the test split remains
+unused, and only Kaggle establishes a score below $0.01922$. Independent
+supervision and frozen-input checks accompany execution; older data remain intact.
+
+\input{persistence_calibration_results}

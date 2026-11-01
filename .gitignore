@@ -84,8 +84,8 @@ experiments/runs/**/supervisor_status.json
 experiments/runs/**/supervisor_events.jsonl
 
 # Publish active-study protocol only; add its measurement records on completion.
-experiments/runs/gated_reheat_calibration/*
-!experiments/runs/gated_reheat_calibration/protocol.json
+experiments/runs/persistence_calibration/*
+!experiments/runs/persistence_calibration/protocol.json
 
 # Filesystem fixtures from local tests, including inaccessible empty temp dirs.
 tests/tmp*/
