@@ -109,6 +109,16 @@ Older best/pending statements below are historical; current target is <0.01922.
   is watching. Ten gated-policy/workflow tests passed again after setup.
 
 ## Independent supervision (2026-11-01)
+- 2026-11-02: user explicitly requested restart of persistence study; stopped
+  supervisor via stop marker, terminated only its scheduler/worker subtree,
+  preserved all 66 results, relaunched independent supervisor. Latest count
+  training persist_432 5/30, three workers active, no errors, median ~8.5 min.
+- Prepared orthogonal candidate `policies/comfort_hold_release.py`: clear only
+  stale cooling hold memory after sustained all-zones-below-centre plus cold
+  deficit, retaining V7 valve curve and parent requests/coordination. No registry
+  or builder edits, so running study's frozen hashes remain unchanged. No
+  performance rollout yet. Prospective arms and next integration/evaluation
+  steps in `reports/COMFORT_HOLD_RELEASE_PROTOCOL.md`; do not claim a winner.
 - New persistence study: `hvaclab/persistence_calibration.py`, directory
   `experiments/runs/persistence_calibration`, full cooling hold 144/432/576
   steps against V7's 288, global valve exponent .75 unchanged. Fresh full V7

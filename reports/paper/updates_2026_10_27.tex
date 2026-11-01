@@ -704,3 +704,28 @@ unused, and only Kaggle establishes a score below $0.01922$. Independent
 supervision and frozen-input checks accompany execution; older data remain intact.
 
 \input{persistence_calibration_results}
+
+\subsection{Prepared orthogonal hypothesis: release of stale cooling hold}
+While full-duration persistence validation runs, an isolated candidate is
+prepared without changing its frozen dependencies. It retains Version 7's
+global valve curve and 288-step hold. During active PI, if all finite zone
+observations under an AHU stay at or below the band centre and at least one
+is below the low edge by a fixed deficit, consecutive confirmation clears
+only that AHU's hold timer and stored cooling command before parent control.
+New parent cooling requests may rearm hold; heating and airflow/water
+coordination remain authoritative. This does not directly force an AHU off.
+
+The prospective arms use deficit/confirmation pairs $(0.5\,\mathrm{K},3)$,
+$(0.25\,\mathrm{K},3)$ and $(0.5\,\mathrm{K},6)$ five-minute samples.
+The mechanism may be inactive because aggregate heating already cancels hold;
+an unreachable cold outlier may also remove useful reserve. These limitations
+are hypotheses to measure, not a claimed comfort guarantee. The inherited
+observation delay remains and no reward, true state or scenario identity is used.
+No rollout or performance result exists for this candidate yet.
+
+After the current study completes, fresh full-control reproduction and all
+20 dev episodes per arm precede ranked 30-case training checks. Packaging
+requires both full means below Version 7, V4 and any full-cohort winner from
+the current study, then standalone verification. Release counts should be
+recorded to identify an inactive mechanism. The test split remains unused;
+all previous data remain retained and organizer superiority remains unproven.
