@@ -78,6 +78,10 @@ experiments/runs/**/notification_watcher.json
 experiments/runs/**/completion_notice.json
 experiments/runs/**/retired_notification_helpers.json
 experiments/runs/**/attempts.jsonl
+experiments/runs/**/supervisor.lock
+experiments/runs/**/supervisor.stop
+experiments/runs/**/supervisor_status.json
+experiments/runs/**/supervisor_events.jsonl
 
 # Publish active-study protocol only; add its measurement records on completion.
 experiments/runs/gated_reheat_calibration/*

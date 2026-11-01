@@ -63,6 +63,11 @@ tests command-mode and cold-zone gates, and requires complete local means
 below both V4 and the submitted global curve. See its
 [recorded results](reports/GATED_REHEAT_REVIEW.md). Earlier results are retained.
 
+Independent [background supervision](reports/STUDY_SUPERVISOR.md) can adopt the
+running gated-reheat scheduler, record exits and restart from saved episodes.
+Launch with `powershell -NoProfile -File reports/scripts/start_study_supervisor.ps1`.
+It does not register Windows startup or prevent sleep.
+
 The comfort term is **occupancy-weighted**, and the weighting is applied as a
 hard gate. From `smart_control/reward/base_setpoint_energy_carbon_reward.py`:
 

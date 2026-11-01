@@ -4,6 +4,10 @@ Updated 2026-10-31 (Asia/Saigon). Actual repository is this directory;
 workspace parent contains `.venv`. Run commands here using
 `..\.venv\Scripts\python.exe` (PowerShell).
 
+Update 2026-11-01: user screenshot confirms Kaggle Version 7
+(`valve8_gentle`) public score **0.01922**, now best, 3.125% below V4.
+Older best/pending statements below are historical; current target is <0.01922.
+
 ## Goal and architecture
 - Optimize a transferable HVAC policy for the Kaggle NeurIPS 2026 Smart
   Buildings competition. Lower scores are better. Aim to beat V4 on Kaggle.
@@ -99,3 +103,24 @@ workspace parent contains `.venv`. Run commands here using
   frozen source hashes remained unchanged. Live paper tables and this local
   context can differ from the published snapshot as execution progresses.
 - Completed V8 results/paper were subsequently pushed as `aed0551`.
+- Conditional-curve code/tests/protocol/paper pushed as `e9fef0e`. Final check:
+  one control worker consuming CPU, no errors, no changed frozen source hashes;
+  about .97 GiB RAM available, so additional workers wait. Completion notifier
+  is watching. Ten gated-policy/workflow tests passed again after setup.
+
+## Independent supervision (2026-11-01)
+- User requested robust background supervision. Added `hvaclab/supervisor.py`
+  and hidden independent launcher `reports/scripts/start_study_supervisor.ps1`.
+  Launched outside the tool session, verified alive and adopting existing
+  scheduler/three workers. Current dev count 42/60 plus two controls.
+- Every 15s checks exact scheduler/module and resolved worker job-directory;
+  waits for orphan workers before restarting, validates frozen source/reference
+  hashes and RAM/disk, resumes saved episodes. Logs exit codes and separate
+  scheduler output, retry backoff 15–300s, blocks after five consecutive short
+  failures. Stop marker ends supervision without terminating the study.
+- Seven dedicated tests passed including real child exit code 7, logged crash,
+  retry and completion; no real rollout was killed for testing. Frozen study
+  sources remain unchanged. Details in `reports/STUDY_SUPERVISOR.md`.
+- No automatic reboot/logoff startup or sleep prevention was installed. Sleep
+  stops computation; after reboot run the launcher. Existing adopted scheduler
+  has no retroactive output log; new supervised launches do.

@@ -659,3 +659,19 @@ the test split stays unused, and organizer superiority requires a Kaggle score.
 All preceding data and artifacts remain preserved.
 
 \input{gated_reheat_calibration_results}
+
+\subsection{Organizer confirmation and execution supervision, 1 November}
+The user's Kaggle screenshot confirms notebook Version 7
+(\texttt{valve8\_gentle}) at $0.01922$, below V4's $0.01984$ by $3.125\%$.
+It is now the best reported organizer score among these submissions. Earlier
+pending/best-version statements record their historical state; all earlier
+local and organizer results remain retained.
+
+The conditional-curve experiment additionally receives independent background
+supervision without changing its frozen policy or evaluation protocol. It
+adopts a live scheduler, waits for surviving workers, validates frozen inputs
+and resources before restarting from saved results, and logs scheduler exits
+with bounded retry backoff. A real child-process crash/retry test complements
+duplicate-launch and input/resource-gate tests. This improves execution
+continuity, not controller performance. It does not prevent system sleep or
+automatically start after reboot; those remain operational limitations.
