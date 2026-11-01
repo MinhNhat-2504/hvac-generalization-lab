@@ -8,6 +8,11 @@ Update 2026-11-01: user screenshot confirms Kaggle Version 7
 (`valve8_gentle`) public score **0.01922**, now best, 3.125% below V4.
 Older best/pending statements below are historical; current target is <0.01922.
 
+2026-11-02: user confirms persist_432 is running on Kaggle as Version 8;
+organizer score pending. Persistence finished 91 full episodes, selecting
+persist_432: train .0141808105 (-1.2789% versus V7), dev .0162534593
+(-1.1970%), real action parity 1,152 pairs. V7 remains best public .01922.
+
 ## Goal and architecture
 - Optimize a transferable HVAC policy for the Kaggle NeurIPS 2026 Smart
   Buildings competition. Lower scores are better. Aim to beat V4 on Kaggle.
@@ -109,6 +114,23 @@ Older best/pending statements below are historical; current target is <0.01922.
   is watching. Ten gated-policy/workflow tests passed again after setup.
 
 ## Independent supervision (2026-11-01)
+- User requested a continuously prepared backlog of 2–3 studies, plus additive
+  paper updates. Added two allowlisted queues behind active hold release:
+  `curve_refinement` (valve exponents .5/.625/.875 on persist_432) then
+  `heating_damper` (heating-only damper exponents .75/1.25/1.5 with valve .75).
+  Both fixed studies compare full means against V7, V4 and ALL selected prior
+  winners; do not automatically combine changes. Replenish using evidence.
+- Pipeline code: `pipeline_calibration.py`, `pipeline_entry.py`,
+  `pipeline_queue.py`, two module wrappers and hidden launcher
+  `reports/scripts/start_research_pipeline.ps1`. Each queue waits for every
+  dependency status complete AND scheduler exit, prepares frozen references,
+  then supervises isolated workers. No active registry/builder file edits.
+- 137 tests passed, including both workflow families, predecessor-winner veto,
+  candidate/control/standalone parity and exact packaged source/runtime marker.
+  Live check: hold release 18/60 dev, three workers, no errors; both new queues
+  alive in waiting_for_preceding_study. Active frozen hashes unchanged.
+  Paper rebuilt with V8 submission mapping, persistence result, both prospective
+  protocols and separate auto-updating tables. Desktop notices enabled.
 - User authorized automatic sequential execution of the prepared release study.
   Detached `hold_release_queue` waits for persistence completion and scheduler
   exit, then prepares/supervises `hold_release_calibration`. Child-local entry

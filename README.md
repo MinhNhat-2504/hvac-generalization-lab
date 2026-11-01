@@ -75,6 +75,14 @@ The next [persistence study](reports/PERSISTENCE_PROTOCOL.md) tests 12/36/48-hou
 cooling holds against Version 7's 24 hours while retaining its valve curve.
 See [results](reports/PERSISTENCE_REVIEW.md). Earlier measurements stay retained.
 
+2026-11-02: `persist_432` passed local training/dev (-1.28%/-1.20% versus
+Version 7) and standalone parity; user is running it on Kaggle as **Version 8**,
+score pending. The [research pipeline](reports/RESEARCH_PIPELINE_PROTOCOL.md)
+keeps the active hold-release study followed by two prepared sequential
+studies: reheat-exponent refinement, then heating-damper response. Each must
+beat all selected preceding full-cohort winners before packaging. Separate
+paper tables and reports update during execution; existing data remain retained.
+
 The comfort term is **occupancy-weighted**, and the weighting is applied as a
 hard gate. From `smart_control/reward/base_setpoint_energy_carbon_reward.py`:
 

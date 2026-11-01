@@ -1,0 +1,28 @@
+{
+  "task": {
+    "split": "training",
+    "policy": "persist_432",
+    "building": "building_train_4",
+    "weather": "fairbanks_4",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/training_scenarios"
+  },
+  "fingerprint": "cae8dc49dc5f97f447f5cba6085910417efd6084f1fb087ca424bb486c18e6ed",
+  "result": {
+    "building": "building_train_4",
+    "weather": "fairbanks_4",
+    "policy": "persist_432",
+    "steps": 8640,
+    "total_reward": -44.28726881989314,
+    "mean_reward": -0.005125841298598744,
+    "prod_regret": -21.39961805011734,
+    "energy_cost": 65.37610636314821,
+    "carbon": 91.86138350169131,
+    "occupied_steps": 3117,
+    "reward_occupied": -25.290109778172337,
+    "reward_unoccupied": -18.997159041720806,
+    "mean_occupancy": 9.904745370370371,
+    "seconds": 480.16900157928467,
+    "error": ""
+  }
+}

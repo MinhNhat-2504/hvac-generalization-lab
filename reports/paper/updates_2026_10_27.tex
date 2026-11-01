@@ -739,3 +739,39 @@ study also compares against any selected full-cohort persistence winner.
 The second study remains queued, with no performance measurements yet.
 
 \input{hold_release_calibration_results}
+
+\subsection{Persistence completion and two queued Version 8 follow-ups}
+The persistence study completed 91 valid episodes, selecting
+\texttt{persist\_432} (36-hour hold). Its full training mean is $0.0141808105$
+($-1.2789\%$ versus Version 7), and full dev mean $0.0162534593$
+($-1.1970\%$). Training improves 18 cases, regresses nine and ties three;
+dev improves 12, regresses five and ties three. Standalone verification matched
+1,152 real-observation pairs. The user is running this notebook on Kaggle as
+Version 8; organizer score pending. Version 7 at $0.01922$ remains the best
+reported public result. Earlier tables remain retained.
+
+While the sustained-cold hold-release study runs, two fixed follow-ups are
+queued serially. First, retain \texttt{persist\_432} and vary the reheat exponent
+to $p\in\{0.5,0.625,0.875\}$ against $0.75$. The $0.5$ curve was previously
+tested with a 24-hour hold, so this is an interaction follow-up, not an
+untouched hypothesis. Second, retain the 36-hour hold and $h^{0.75}$ valve,
+but use heating-only damper $(-u)^q$ for negative PI demand, with
+$q\in\{0.75,1.25,1.5\}$ against one. Cooling/out-of-window dampers, PI state,
+bands and plant coordination remain inherited. Intermediate airflow can trade
+heat delivery against intake load, so neither direction is assumed beneficial.
+Zero/full authority remains preserved and no scenario labels select actions.
+
+Each study waits for predecessor completion and scheduler exit. A fresh full
+\texttt{persist\_432} reproduction precedes all 20 dev episodes per arm and
+ranked 30-case training checks. Packaging requires both full means below
+Version 7, V4 and every selected full-cohort predecessor winner, followed by
+standalone parity. Candidates remain independent changes rather than automatic
+combinations. Each bounded study uses at most 151 episodes before verification.
+Independent queues register candidates only in child memory; the current
+study's frozen files remain unchanged. Per-study reports/tables update at
+checkpoints, and PDFs rebuild at stage transitions. Repeated local tuning
+remains exploratory, the test split is unused, and only Kaggle establishes
+organizer superiority. All previous data and artifacts remain intact.
+
+\input{curve_refinement_results}
+\input{heating_damper_results}
