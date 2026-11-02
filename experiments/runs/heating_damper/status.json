@@ -1,0 +1,316 @@
+{
+  "status": "complete",
+  "stage": "finished",
+  "completed": 91,
+  "failed": [],
+  "waiting_for_memory": false,
+  "waiting_for_disk": false,
+  "active": [],
+  "decision": {
+    "unchanged_curve_full_episode_parity": true,
+    "full_dev_calibration": {
+      "damper11_more": {
+        "n": 20,
+        "score": 0.016321195755817836,
+        "submitted_curve": 0.01645036602119071,
+        "winner_scores": {
+          "persistence_calibration:persist_432": 0.016253459275641348
+        },
+        "winner_score": 0.016253459275641348,
+        "e_sync": 0.016684401534295998,
+        "change_vs_v4_pct": -2.1769182294706035,
+        "change_pct": -0.7852121053506189,
+        "worst_ratio": 1.0651616423228074,
+        "improved": 12,
+        "regressed": 8,
+        "largest_increases": [
+          {
+            "scenario": "building_9000/fairbanks_3",
+            "score": 0.035474293584839715,
+            "submitted_curve": 0.03465875094306057,
+            "difference": 0.0008155426417791461
+          },
+          {
+            "scenario": "building_9003/fairbanks_3",
+            "score": 0.011314575443529934,
+            "submitted_curve": 0.010622402266435486,
+            "difference": 0.0006921731770944475
+          },
+          {
+            "scenario": "building_9000/denver_1",
+            "score": 0.0409130661109556,
+            "submitted_curve": 0.040317059829980434,
+            "difference": 0.0005960062809751629
+          }
+        ],
+        "comfort": 0.003064253129152016,
+        "energy": 0.006571772176713696,
+        "carbon": 0.006685170449992355,
+        "passes": false
+      },
+      "damper11_less": {
+        "n": 20,
+        "score": 0.016245680988938322,
+        "submitted_curve": 0.01645036602119071,
+        "winner_scores": {
+          "persistence_calibration:persist_432": 0.016253459275641348
+        },
+        "winner_score": 0.016253459275641348,
+        "e_sync": 0.016684401534295998,
+        "change_vs_v4_pct": -2.629525215248829,
+        "change_pct": -1.2442582249460044,
+        "worst_ratio": 1.0321622070622727,
+        "improved": 12,
+        "regressed": 8,
+        "largest_increases": [
+          {
+            "scenario": "building_9003/fairbanks_3",
+            "score": 0.01096404216762734,
+            "submitted_curve": 0.010622402266435486,
+            "difference": 0.00034163990119185327
+          },
+          {
+            "scenario": "building_9002/atlanta_4",
+            "score": 0.018215215542730544,
+            "submitted_curve": 0.017992185254476566,
+            "difference": 0.00022303028825397878
+          },
+          {
+            "scenario": "building_9000/denver_1",
+            "score": 0.04049367237669104,
+            "submitted_curve": 0.040317059829980434,
+            "difference": 0.00017661254671060694
+          }
+        ],
+        "comfort": 0.003333465487784424,
+        "energy": 0.006489033089620483,
+        "carbon": 0.006423182414793481,
+        "passes": true
+      },
+      "damper11_soft": {
+        "n": 20,
+        "score": 0.01627117494065269,
+        "submitted_curve": 0.01645036602119071,
+        "winner_scores": {
+          "persistence_calibration:persist_432": 0.016253459275641348
+        },
+        "winner_score": 0.016253459275641348,
+        "e_sync": 0.016684401534295998,
+        "change_vs_v4_pct": -2.476724099416394,
+        "change_pct": -1.0892832433466393,
+        "worst_ratio": 1.0336129449277414,
+        "improved": 12,
+        "regressed": 8,
+        "largest_increases": [
+          {
+            "scenario": "building_9002/denver_1",
+            "score": 0.024278500283253273,
+            "submitted_curve": 0.023848298196467072,
+            "difference": 0.0004302020867862008
+          },
+          {
+            "scenario": "building_9003/fairbanks_3",
+            "score": 0.010979452488817498,
+            "submitted_curve": 0.010622402266435486,
+            "difference": 0.0003570502223820115
+          },
+          {
+            "scenario": "building_9002/atlanta_4",
+            "score": 0.018215215542730544,
+            "submitted_curve": 0.017992185254476566,
+            "difference": 0.00022303028825397878
+          }
+        ],
+        "comfort": 0.0034571916100186737,
+        "energy": 0.0064728428544253355,
+        "carbon": 0.006341140476974436,
+        "passes": false
+      }
+    },
+    "ranked_candidates": {
+      "1": [
+        "damper11_less"
+      ]
+    },
+    "full_trials": {
+      "damper11_less": {
+        "training": {
+          "n": 30,
+          "score": 0.014040684517909864,
+          "submitted_curve": 0.014364513768903317,
+          "winner_scores": {
+            "persistence_calibration:persist_432": 0.014180810508468818
+          },
+          "winner_score": 0.014180810508468818,
+          "e_sync": 0.014453943529822781,
+          "change_vs_v4_pct": -2.859143672868525,
+          "change_pct": -2.2543697350514424,
+          "worst_ratio": 1.017228311964065,
+          "improved": 24,
+          "regressed": 6,
+          "largest_increases": [
+            {
+              "scenario": "building_train_7/fairbanks_7",
+              "score": 0.013632015617394733,
+              "submitted_curve": 0.01340113665443899,
+              "difference": 0.00023087896295574326
+            },
+            {
+              "scenario": "building_train_2/atlanta_3",
+              "score": 0.008564898166655524,
+              "submitted_curve": 0.008452326988510903,
+              "difference": 0.00011257117814462113
+            },
+            {
+              "scenario": "building_train_8/phoenix_4",
+              "score": 0.02384428524818321,
+              "submitted_curve": 0.023743217578467684,
+              "difference": 0.00010106766971552592
+            }
+          ],
+          "comfort": 0.00193692880498694,
+          "energy": 0.006927849580319135,
+          "carbon": 0.005175906134955014,
+          "passes": true
+        },
+        "dev": {
+          "n": 20,
+          "score": 0.016245680988938322,
+          "submitted_curve": 0.01645036602119071,
+          "winner_scores": {
+            "persistence_calibration:persist_432": 0.016253459275641348
+          },
+          "winner_score": 0.016253459275641348,
+          "e_sync": 0.016684401534295998,
+          "change_vs_v4_pct": -2.629525215248829,
+          "change_pct": -1.2442582249460044,
+          "worst_ratio": 1.0321622070622727,
+          "improved": 12,
+          "regressed": 8,
+          "largest_increases": [
+            {
+              "scenario": "building_9003/fairbanks_3",
+              "score": 0.01096404216762734,
+              "submitted_curve": 0.010622402266435486,
+              "difference": 0.00034163990119185327
+            },
+            {
+              "scenario": "building_9002/atlanta_4",
+              "score": 0.018215215542730544,
+              "submitted_curve": 0.017992185254476566,
+              "difference": 0.00022303028825397878
+            },
+            {
+              "scenario": "building_9000/denver_1",
+              "score": 0.04049367237669104,
+              "submitted_curve": 0.040317059829980434,
+              "difference": 0.00017661254671060694
+            }
+          ],
+          "comfort": 0.003333465487784424,
+          "energy": 0.006489033089620483,
+          "carbon": 0.006423182414793481,
+          "passes": true
+        }
+      }
+    },
+    "calibration_batch": 1,
+    "evaluating_candidate": "damper11_less",
+    "full_training": {
+      "n": 30,
+      "score": 0.014040684517909864,
+      "submitted_curve": 0.014364513768903317,
+      "winner_scores": {
+        "persistence_calibration:persist_432": 0.014180810508468818
+      },
+      "winner_score": 0.014180810508468818,
+      "e_sync": 0.014453943529822781,
+      "change_vs_v4_pct": -2.859143672868525,
+      "change_pct": -2.2543697350514424,
+      "worst_ratio": 1.017228311964065,
+      "improved": 24,
+      "regressed": 6,
+      "largest_increases": [
+        {
+          "scenario": "building_train_7/fairbanks_7",
+          "score": 0.013632015617394733,
+          "submitted_curve": 0.01340113665443899,
+          "difference": 0.00023087896295574326
+        },
+        {
+          "scenario": "building_train_2/atlanta_3",
+          "score": 0.008564898166655524,
+          "submitted_curve": 0.008452326988510903,
+          "difference": 0.00011257117814462113
+        },
+        {
+          "scenario": "building_train_8/phoenix_4",
+          "score": 0.02384428524818321,
+          "submitted_curve": 0.023743217578467684,
+          "difference": 0.00010106766971552592
+        }
+      ],
+      "comfort": 0.00193692880498694,
+      "energy": 0.006927849580319135,
+      "carbon": 0.005175906134955014,
+      "passes": true
+    },
+    "full_dev": {
+      "n": 20,
+      "score": 0.016245680988938322,
+      "submitted_curve": 0.01645036602119071,
+      "winner_scores": {
+        "persistence_calibration:persist_432": 0.016253459275641348
+      },
+      "winner_score": 0.016253459275641348,
+      "e_sync": 0.016684401534295998,
+      "change_vs_v4_pct": -2.629525215248829,
+      "change_pct": -1.2442582249460044,
+      "worst_ratio": 1.0321622070622727,
+      "improved": 12,
+      "regressed": 8,
+      "largest_increases": [
+        {
+          "scenario": "building_9003/fairbanks_3",
+          "score": 0.01096404216762734,
+          "submitted_curve": 0.010622402266435486,
+          "difference": 0.00034163990119185327
+        },
+        {
+          "scenario": "building_9002/atlanta_4",
+          "score": 0.018215215542730544,
+          "submitted_curve": 0.017992185254476566,
+          "difference": 0.00022303028825397878
+        },
+        {
+          "scenario": "building_9000/denver_1",
+          "score": 0.04049367237669104,
+          "submitted_curve": 0.040317059829980434,
+          "difference": 0.00017661254671060694
+        }
+      ],
+      "comfort": 0.003333465487784424,
+      "energy": 0.006489033089620483,
+      "carbon": 0.006423182414793481,
+      "passes": true
+    },
+    "selected": "damper11_less",
+    "eligible_for_packaging": true,
+    "submission_notebook": "experiments/submission/damper11_less/submission.ipynb"
+  },
+  "counts": {
+    "damper11_more": {
+      "dev": 20,
+      "training": 0
+    },
+    "damper11_less": {
+      "dev": 20,
+      "training": 30
+    },
+    "damper11_soft": {
+      "dev": 20,
+      "training": 0
+    }
+  },
+  "updated_at": "2026-11-02T11:44:33+0700"
+}

@@ -775,3 +775,40 @@ organizer superiority. All previous data and artifacts remain intact.
 
 \input{curve_refinement_results}
 \input{heating_damper_results}
+
+\subsection{Prior pipeline completion and two fixed Version 9 follow-ups}
+The three queued studies finished without rollout errors. Hold-release used
+61 episodes and all candidates failed dev; valve refinement used 61 and none
+beat \texttt{persist\_432}. Heating-damper response used 91 episodes and
+selected \texttt{damper11\_less}, with exponent 1.25, valve exponent 0.75 and
+432-step hold. Its training mean $0.0140406845$ improves on Version 7 by
+$2.254\%$ and \texttt{persist\_432} by $0.988\%$; dev mean $0.0162456810$
+improves by $1.244\%$ and $0.04786\%$, respectively. The small latter
+advantage does not establish organizer superiority. Standalone verification
+matched 1,152 observation pairs. The user reports both Kaggle Version 8
+(\texttt{persist\_432}) and Version 9 (\texttt{damper11\_less}) running/scoring;
+their organizer scores have not been reported. Version 7's $0.01922$ remains
+the best reported public result. All previous data remain retained.
+
+Two new fixed studies use the Version 9 controller. First vary only heating
+damper exponent $q\in\{1.1,1.4,1.75\}$ against 1.25. Then vary only cooling
+hold to 288, 576 or 720 steps (24,48,60 hours) against 432 steps (36 hours),
+retaining the 1.25 damper and 0.75 valve. Previously tested hold durations
+used a different damper law, so these are explicit interaction follow-ups.
+PI state/gains, schedule, cooling dampers and plant coordination remain
+inherited. No monotonic performance response or organizer improvement is
+assumed, and no scenario labels select actions.
+
+Each receives a fresh full Version 9 reproduction control, all 20 dev
+scenarios per arm, and ranked 30-case training checks for eligible arms.
+Both complete means must beat Version 7, V4, \texttt{persist\_432},
+\texttt{damper11\_less} and every selected preceding full-cohort winner by
+more than $10^{-10}$ before packaging and standalone verification. The second
+study waits for the first and does not automatically combine its winner.
+Each uses at most 151 full episodes before verification. Independent queues,
+frozen inputs and per-study checkpoint tables accompany execution. Repeated
+dev tuning remains exploratory, the test split stays unused, and only Kaggle
+can establish the next organizer ranking. Earlier measurements remain intact.
+
+\input{damper_refinement_results}
+\input{damper_persistence_results}

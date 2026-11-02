@@ -81,9 +81,11 @@ def run_study():
             if any(len(group[split])!=len(refs[split]) for split in refs):
                 raise ValueError('winner identities mismatch: '+dependency)
             comparison_groups.append((dependency,selected,group))
-    fixed_rows=[r for r in runner.load(Path('experiments/runs/persistence_calibration/rollouts.json'))
-                if r.policy=='persist_432']
-    if len(fixed_rows)!=50:raise ValueError('persist_432 control reference missing')
+    base_key=SPECS[STUDY].get('base_key','persist_432')
+    base_run=SPECS[STUDY].get('control_run','persistence_calibration')
+    fixed_rows=[r for r in runner.load(Path('experiments/runs')/base_run/'rollouts.json')
+                if r.policy==base_key]
+    if len(fixed_rows)!=50:raise ValueError('control reference missing: '+base_key)
     fixed_refs={split:{(r.building,r.weather):r for r in fixed_rows
                        if (r.building,r.weather) in refs[split]} for split in refs}
     dev_pairs = sorted(refs["dev"])
@@ -199,7 +201,7 @@ def run_study():
                 "These are complete matched cohorts. Dev is repeatedly used model-selection data, not untouched validation. Individual regressions are reported without a hard cutoff.",
                 "Completed new rollouts: " + str(len(records)) + ". No candidate replaces Version 4 automatically."]
         if "unchanged_curve_full_episode_parity" in decision:
-            tex.append("The fresh persist\\_432 full-episode reproduction gate "
+            tex.append("The fresh baseline full-episode reproduction gate "
                        +( "passed." if decision["unchanged_curve_full_episode_parity"] else "failed."))
         if "stop_reason" in decision:
             tex.append("Experiment decision: " + decision["stop_reason"] + ".")
@@ -307,7 +309,7 @@ def run_study():
         control=records[("training",CONTROL,*CONTROL_PAIR)]["result"]
         parity=abs(control["mean_reward"]-fixed_refs["training"][CONTROL_PAIR].mean_reward)<=1e-10
         decision["unchanged_curve_full_episode_parity"]=parity
-        if not parity:raise RuntimeError("persist_432 full control mismatch")
+        if not parity:raise RuntimeError("full control mismatch: "+base_key)
         decision["full_dev_calibration"]={}
         decision["ranked_candidates"]={}
         decision["full_trials"]={}
@@ -345,7 +347,8 @@ def run_study():
                 notebook=Path("experiments/submission")/selected/"submission.ipynb"
                 decision["submission_notebook"]=notebook.as_posix()
                 params=_VARIANTS[selected][1]
-                description=(f"{STUDY}: variant={selected}; hold=432 steps (36h). "
+                description=(f"{STUDY}: variant={selected}; hold={params['hold_steps']} steps "
+                             f"({params['hold_steps']/12:g}h). "
                              f"Reheat exponent={params['reheat_exponent']}; "
                              f"heating damper exponent={params.get('heating_damper_exponent',1.0)}. "
                              "Lower full local means than V7, V4 and selected predecessor winners. "

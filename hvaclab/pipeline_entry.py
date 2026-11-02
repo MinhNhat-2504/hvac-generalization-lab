@@ -17,16 +17,32 @@ SPECS={
           'damper11_less':dict(heating_damper_exponent=1.25),
           'damper11_soft':dict(heating_damper_exponent=1.5)},
     dependencies=('hold_release_calibration','curve_refinement'),
-    title='Heating damper response with the Version 8 reheat curve')}
+    title='Heating damper response with the Version 8 reheat curve'),
+ 'damper_refinement':dict(control='damper12_ctrl',base_key='damper11_less',
+    control_run='heating_damper',heating_class=True,
+    arms={'damper12_ctrl':dict(heating_damper_exponent=1.25),
+          'damper12_light':dict(heating_damper_exponent=1.1),
+          'damper12_mid':dict(heating_damper_exponent=1.4),
+          'damper12_strong':dict(heating_damper_exponent=1.75)},
+    dependencies=('hold_release_calibration','curve_refinement','heating_damper'),
+    title='Heating damper exponent refinement on submitted Version 9'),
+ 'damper_persistence':dict(control='persist13_ctrl',base_key='damper11_less',
+    control_run='heating_damper',heating_class=True,
+    arms={'persist13_ctrl':dict(hold_steps=432),
+          'persist13_day':dict(hold_steps=288),
+          'persist13_two':dict(hold_steps=576),
+          'persist13_long':dict(hold_steps=720)},
+    dependencies=('hold_release_calibration','curve_refinement','heating_damper','damper_refinement'),
+    title='Cooling persistence interaction with submitted Version 9 heating airflow')}
 
 
 def register():
     from hvaclab.registry import _OURS,_VARIANTS
     _OURS['heating_damper_curve']=('hvaclab.policies.heating_damper_curve','HeatingDamperCurvePolicy')
-    base=dict(_VARIANTS['persist_432'][1])
     for study,spec in SPECS.items():
+        base=dict(_VARIANTS[spec.get('base_key','persist_432')][1])
         for key,params in spec['arms'].items():
-            _VARIANTS[key]=('heating_damper_curve' if study=='heating_damper' else 'reheat_curve',
+            _VARIANTS[key]=('heating_damper_curve' if study=='heating_damper' or spec.get('heating_class') else 'reheat_curve',
                             {**base,**params})
 
 
@@ -41,7 +57,7 @@ def assemble(key):
     base,_=assemble_variant('persist_432')
     base=base[:base.rindex('\nEQUIVALENT_TO =')]
     parent='ReheatCurvePolicy'
-    if study=='heating_damper':
+    if study=='heating_damper' or SPECS[study].get('heating_class'):
         source=(Path(__file__).parent/'policies/heating_damper_curve.py').read_text(encoding='utf-8')
         lines=source.splitlines(keepends=True)
         for node in ast.parse(source).body:
@@ -62,7 +78,9 @@ def package():
     key=sys.argv[sys.argv.index('--variant')+1]
     assembled=assemble(key)
     sources=bundle.variant_sources('persist_432')
-    if key_study(key)=='heating_damper':sources+=('hvaclab/policies/heating_damper_curve.py',)
+    family=key_study(key)
+    if family=='heating_damper' or SPECS[family].get('heating_class'):
+        sources+=('hvaclab/policies/heating_damper_curve.py',)
     def adapter(k):
         if k!=key:raise ValueError('unexpected packaging key')
         return assembled

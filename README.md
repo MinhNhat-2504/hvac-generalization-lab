@@ -83,6 +83,14 @@ studies: reheat-exponent refinement, then heating-damper response. Each must
 beat all selected preceding full-cohort winners before packaging. Separate
 paper tables and reports update during execution; existing data remain retained.
 
+Later on 2026-11-02, the queue completed: hold-release and valve refinement
+were rejected; heating-damper exponent 1.25 passed both complete cohorts and
+standalone parity as `damper11_less`. The user is running it on Kaggle as
+**Version 9**, alongside Version 8; both scores pending. The
+[two V9 follow-ups](reports/V9_FOLLOWUPS_PROTOCOL.md) refine its heating-damper
+exponent, then hold-duration interaction, with strict comparison against all
+selected earlier winners. Version 7 remains best reported public 0.01922.
+
 The comfort term is **occupancy-weighted**, and the weighting is applied as a
 hard gate. From `smart_control/reward/base_setpoint_energy_carbon_reward.py`:
 

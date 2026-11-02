@@ -13,6 +13,9 @@ organizer score pending. Persistence finished 91 full episodes, selecting
 persist_432: train .0141808105 (-1.2789% versus V7), dev .0162534593
 (-1.1970%), real action parity 1,152 pairs. V7 remains best public .01922.
 
+Later 2026-11-02: user confirms BOTH V8/persist432 and V9/damper11_less
+are running/scoring on Kaggle; neither new score has been provided.
+
 ## Goal and architecture
 - Optimize a transferable HVAC policy for the Kaggle NeurIPS 2026 Smart
   Buildings competition. Lower scores are better. Aim to beat V4 on Kaggle.
@@ -114,6 +117,34 @@ persist_432: train .0141808105 (-1.2789% versus V7), dev .0162534593
   is watching. Ten gated-policy/workflow tests passed again after setup.
 
 ## Independent supervision (2026-11-01)
+- User requested two further improvements. Added `damper_refinement` (V9
+  heating exponents 1.1/1.4/1.75 vs 1.25) then `damper_persistence` (V9 hold
+  288/576/720 vs 432 steps). Both base on damper11_less, not automatic winner
+  combinations; full means must beat all selected predecessor winners.
+- Child-local pipeline registration now supports a declared base_key/control_run
+  and heating subclass; old V9 assembly verified unchanged. Fresh control uses
+  50 cached V9 episodes. Isolated per-study protocol/run directories preserve
+  earlier immutable experiment records; do not resume old completed protocols
+  after shared pipeline-code updates.
+- 140 tests passed, including both new workflow families, packaged-source/
+  startup-marker checks, all identity controls and standalone action parity.
+  Two hidden queues launched via reports/scripts/start_v9_followups.ps1.
+  Final setup check: damper_refinement actively running its fresh control,
+  damper_persistence waiting for predecessor; no frozen source hash changes.
+  Paper PDF contains prior pipeline completion and new V9 prospective section.
+  Desktop completion watchers enabled for both.
+- 2026-11-02 completion audit: all three queued studies finished normally.
+  Hold release 61 episodes rejected on dev; curve refinement 61 episodes
+  rejected against persist_432. Heating damper 91 episodes selected
+  `damper11_less` (heating damper exponent 1.25, valve .75, hold432).
+  Training mean .0140406845 (-2.2544% vs V7, -.9881% vs persist432);
+  dev .0162456810 (-1.2443% vs V7, -.04786% vs persist432).
+  All have zero rollout errors; supervisors complete; no workers remain.
+- Verified new notebook `experiments/submission/damper11_less/submission.ipynb`:
+  hash matches validation, action parity 1,152 real-observation pairs, final
+  paper PDF includes both cohort scores. Kaggle advantage remains unproven;
+  V7 .01922 best reported, V8 persist432 pending until user provides result.
+  Prepared backlog is now consumed; replenish using these measured outcomes.
 - User requested a continuously prepared backlog of 2–3 studies, plus additive
   paper updates. Added two allowlisted queues behind active hold release:
   `curve_refinement` (valve exponents .5/.625/.875 on persist_432) then

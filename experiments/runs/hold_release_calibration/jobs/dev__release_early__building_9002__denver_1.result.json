@@ -1,0 +1,28 @@
+{
+  "task": {
+    "split": "dev",
+    "policy": "release_early",
+    "building": "building_9002",
+    "weather": "denver_1",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/holdout_scenarios/dev"
+  },
+  "fingerprint": "654d957b8a6b07b6a5f34ff371ebef1419f5307463d069e319b9c6119780fc23",
+  "result": {
+    "building": "building_9002",
+    "weather": "denver_1",
+    "policy": "release_early",
+    "steps": 8640,
+    "total_reward": -206.1265868829978,
+    "mean_reward": -0.02385724385219882,
+    "prod_regret": -51.83061672937947,
+    "energy_cost": 277.8094297589705,
+    "carbon": 597.3316546990491,
+    "occupied_steps": 3110,
+    "reward_occupied": -92.20205209497362,
+    "reward_unoccupied": -113.92453478802418,
+    "mean_occupancy": 5.522569444444445,
+    "seconds": 494.33519315719604,
+    "error": ""
+  }
+}

@@ -68,9 +68,16 @@ class CalibrationWorkflowTest(unittest.TestCase):
             write_json(root/'experiments/runs/hold_release_calibration/status.json',
                        dict(status='complete',decision=dict(selected='fake_prior')))
             save(earlier,root/'experiments/runs/hold_release_calibration/rollouts.json')
-            if family=='heating_damper':
-                write_json(root/'experiments/runs/curve_refinement/status.json',dict(status='complete',decision={}))
-                save([],root/'experiments/runs/curve_refinement/rollouts.json')
+            for dependency in spec['dependencies']:
+                folder=root/'experiments/runs'/dependency
+                if (folder/'status.json').exists():continue
+                if dependency=='heating_damper':
+                    rows=[ScenarioResult(**{**asdict(r),'policy':'damper11_less'}) for r in fixed]
+                    write_json(folder/'status.json',dict(status='complete',decision=dict(selected='damper11_less')))
+                    save(rows,folder/'rollouts.json')
+                else:
+                    write_json(folder/'status.json',dict(status='complete',decision={}))
+                    save([],folder/'rollouts.json')
 
 
             def sandbox_path(*parts):
@@ -154,6 +161,12 @@ class CalibrationWorkflowTest(unittest.TestCase):
 
     def test_second_study_uses_its_own_arms_and_dependencies(self):
         self.exercise(False,family="heating_damper")
+
+    def test_v9_damper_refinement_uses_v9_control_and_all_predecessors(self):
+        self.exercise(False,family="damper_refinement")
+
+    def test_v9_hold_interaction_uses_v9_control_and_all_predecessors(self):
+        self.exercise(False,family="damper_persistence")
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ class PipelinePolicyTest(unittest.TestCase):
         from hvaclab.submission import experimental as bundle
         entry.register()
         original_root=bundle.REPO
-        for key in ('curve10_mid','damper11_less'):
+        for key in ('curve10_mid','damper11_less','damper12_mid','persist13_long'):
             expected,_=entry.assemble(key)
             with workspace_directory() as root:
                 class RoutedRoot:
@@ -60,7 +60,7 @@ class PipelinePolicyTest(unittest.TestCase):
                 exec(compile(source,key,'exec'),scope)
                 left=resolve_policy(key)(building(),None)
                 right=scope['FinalPolicy'](building(),None)
-                baseline=resolve_policy('persist_432')(building(),None) if key==spec['control'] else None
+                baseline=resolve_policy(spec.get('base_key','persist_432'))(building(),None) if key==spec['control'] else None
                 for hour,temp in [(12,[292,295,296,299]),(12,[299]*4),(12,[295.5]*4),
                                   (23,[293]*4),(5,[292]*4)]*40:
                     obs=observation(temp,hour,comfort=hour==12)
@@ -90,6 +90,18 @@ class PipelinePolicyTest(unittest.TestCase):
                 np.testing.assert_array_equal(a['continuous_action'][mask],b['continuous_action'][mask])
                 self.assertEqual(left._zone_integral,right._zone_integral)
                 self.assertEqual(left._zone_u,right._zone_u)
+
+    def test_new_studies_retain_the_declared_v9_base(self):
+        register()
+        for key in SPECS['damper_refinement']['arms']:
+            policy=resolve_policy(key)(building(),None)
+            self.assertEqual(policy.hold_steps,432)
+            self.assertEqual(policy.reheat_exponent,.75)
+        for key,params in SPECS['damper_persistence']['arms'].items():
+            policy=resolve_policy(key)(building(),None)
+            self.assertEqual(policy.hold_steps,params['hold_steps'])
+            self.assertEqual(policy.heating_damper_exponent,1.25)
+            self.assertEqual(policy.reheat_exponent,.75)
 
 
 if __name__=='__main__':unittest.main()

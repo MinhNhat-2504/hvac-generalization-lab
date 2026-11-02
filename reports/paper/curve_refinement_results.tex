@@ -1,1 +1,14 @@
-\paragraph{Queue status.} Reheat-exponent refinement waits for the hold-release study; no new scores.
+\paragraph{Automatically recorded closed-loop results.}
+Status: \texttt{complete}; stage: \texttt{finished}.
+All entries below require complete 8,640-step episodes on matching scenarios.
+\begin{center}\small
+\begin{tabular}{llrrrr}\toprule
+Cohort & Variant & $n$ & Curve & Candidate & Change \\\midrule
+full dev & \texttt{curve10\_half} & 20 & 0.01645037 & 0.01626602 & -1.12\% \\
+full dev & \texttt{curve10\_mid} & 20 & 0.01645037 & 0.01631389 & -0.83\% \\
+full dev & \texttt{curve10\_light} & 20 & 0.01645037 & 0.01628564 & -1.00\% \\
+\bottomrule\end{tabular}\end{center}
+These are complete matched cohorts. Dev is repeatedly used model-selection data, not untouched validation. Individual regressions are reported without a hard cutoff.
+Completed new rollouts: 61. No candidate replaces Version 4 automatically.
+The fresh persist\_432 full-episode reproduction gate passed.
+Experiment decision: no candidate beat all reference means on both cohorts; retain existing submissions.

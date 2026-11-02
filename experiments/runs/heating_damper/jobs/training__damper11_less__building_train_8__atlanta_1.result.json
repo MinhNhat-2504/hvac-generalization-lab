@@ -1,0 +1,28 @@
+{
+  "task": {
+    "split": "training",
+    "policy": "damper11_less",
+    "building": "building_train_8",
+    "weather": "atlanta_1",
+    "steps": 8640,
+    "scenarios_dir": "smart_buildings/training_scenarios"
+  },
+  "fingerprint": "736f3fb893da559c3a59e14e63f03735ced86df0728c5a711e4fe05d93435f3a",
+  "result": {
+    "building": "building_train_8",
+    "weather": "atlanta_1",
+    "policy": "damper11_less",
+    "steps": 8640,
+    "total_reward": -83.50690092185687,
+    "mean_reward": -0.00966515056965936,
+    "prod_regret": -6.442994445155932,
+    "energy_cost": 139.77568964000238,
+    "carbon": 258.42983163629833,
+    "occupied_steps": 3113,
+    "reward_occupied": -27.17453182407189,
+    "reward_unoccupied": -56.33236909778498,
+    "mean_occupancy": 10.956944444444444,
+    "seconds": 174.7405321598053,
+    "error": ""
+  }
+}
