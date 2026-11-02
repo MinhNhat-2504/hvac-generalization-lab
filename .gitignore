@@ -92,3 +92,13 @@ experiments/runs/damper_persistence/*
 # Filesystem fixtures from local tests, including inaccessible empty temp dirs.
 tests/tmp*/
 tests/coverage_test_*/
+
+# User publication policy: source and tests only. Keep research notes, paper,
+# measurement records, plans and generated notebooks on this machine.
+/PROJECT_CONTEXT.md
+/experiments/
+/reports/*
+!/reports/scripts/
+/reports/scripts/*
+!/reports/scripts/*.py
+!/reports/scripts/*.ps1
