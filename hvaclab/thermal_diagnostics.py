@@ -19,6 +19,11 @@ def probe(policy_key,building,weather,steps,output):
     from hvaclab.thermal_coast_entry import register
     from hvaclab.registry import resolve_policy
     register()
+    from hvaclab.registry import _OURS,_VARIANTS
+    _OURS['sensor_coast']=('hvaclab.policies.sensor_aware_coasting','SensorAwareCoastingPolicy')
+    for key,age in (('restart_only',0),('sensor_restart',1)):
+        _VARIANTS[key]=('sensor_coast',{**_VARIANTS['coast_lookahead'][1],
+                                     'sensor_age_steps':age,'recovery_steps':6})
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     config=Path('smart_buildings/holdout_scenarios/dev')/building/weather
     start=time.perf_counter();cpu=time.process_time()
@@ -63,7 +68,7 @@ def probe(policy_key,building,weather,steps,output):
     summary=dict(policy=policy_key,building=building,weather=weather,steps=len(rows),
                  setup_wall=setup_wall,setup_cpu=setup_cpu,wall_seconds=wall,cpu_seconds=process_cpu,
                  policy_seconds=policy_time,environment_seconds=environment_time,
-                 diagnostic_seconds=diagnostic_time,comfort_band=list(policy._comfort_band),
+                 diagnostic_seconds=diagnostic_time,controller_counters={name:getattr(policy,name,0) for name in ('coast_entries','guard_releases','recovery_run_steps','forced_run_steps')},comfort_band=list(policy._comfort_band),
                  zone_ids=[v for v,_ in zones],ahu_zone_indices=[[next(j for j,(v,_) in enumerate(zones) if v==zone[0]) for zone in c['zones']] for c in policy.ahu_controllers],
                  source_scope='offline truth diagnostics only; no submission changes',trace=rows)
     write_json(output/(policy_key+'.json'),summary)
@@ -124,7 +129,7 @@ def compare_probes(candidate_path,baseline_path):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--policy',choices=('damper12_mid','coast_lookahead','coast_reserved','coast_empty'),required=True)
+    parser.add_argument('--policy',choices=('damper12_mid','coast_lookahead','coast_reserved','coast_empty','restart_only','sensor_restart'),required=True)
     parser.add_argument('--building',default='building_9000');parser.add_argument('--weather',default='atlanta_4')
     parser.add_argument('--steps',type=int,default=576);parser.add_argument('--output',default='experiments/runs/thermal_diagnostics')
     args=parser.parse_args()
