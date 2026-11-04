@@ -57,6 +57,22 @@ class PlantRuntimeTest(unittest.TestCase):
         broken=copy.deepcopy(row);broken['parent_run']=[1,1]
         with self.assertRaises(ValueError):aggregate([broken])
 
+    def test_extra_hold_and_removed_runs_are_not_hidden_by_net_runtime(self):
+        from hvaclab.plant_runtime_review import compare_pair
+        def row(t,on,held):
+            return dict(step=t,phase='offhours',dt_seconds=300.,run=[on],parent_run=[int(on and not held)],
+                parent_sat=[1.],hold=[held],hold_origin=['occupied' if held else None],heat_override=[False],
+                pump=0,open_valves=0,held_reheat=[False],starts=[on],pump_start=0,refreshed=[False],new_hold=[False],
+                watts={k:0. for k in ('blower','cooling','pump','gas','heatpump')},weighted_energy=0.,weighted_carbon=0.)
+        a=[row(0,0,False),row(1,1,False)];b=[row(0,1,True),row(1,0,False)]
+        def record(series):return dict(result={'steps':2},plant_telemetry=dict(series=series,phase_totals=aggregate(series),ahu_ids=['a'],transitions=[]))
+        result=compare_pair(record(a),record(b))
+        self.assertEqual(sum(result['offhours_extra_on_handler_steps']),1)
+        self.assertEqual(sum(result['offhours_removed_on_handler_steps']),1)
+        self.assertEqual(result['offhours_extra_on_reason']['hold'],1)
+        self.assertEqual(result['offhours_extra_on_hold_origin']['occupied'],1)
+        self.assertAlmostEqual(result['phase_comparison']['offhours']['delta']['ahu_handler_hours'],0.)
+
     def test_reward_meter_components_are_extracted_without_repricing(self):
         info=RewardInfo()
         info.air_handler_reward_infos['a'].blower_electrical_energy_rate=100.

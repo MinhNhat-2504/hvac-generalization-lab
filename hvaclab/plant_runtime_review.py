@@ -21,7 +21,7 @@ def compare_pair(control,feedback):
         a=base['phase_totals'][phase];b=candidate['phase_totals'][phase]
         phases[phase]=dict(control=a,feedback=b,delta={k:b[k]-a[k] for k in metrics},
                            meter_delta_Wh={k:b['metered_Wh'][k]-a['metered_Wh'][k] for k in a['metered_Wh']})
-    aligned=[];extra=[0]*len(base['ahu_ids']);removed=extra.copy();reason=dict(parent=0,hold=0,heat_override=0)
+    aligned=[];extra=[0]*len(base['ahu_ids']);removed=extra.copy();reason=dict(parent=0,hold=0,heat_override=0);hold_origins={p:0 for p in ('prestart','occupied','scheduled_empty','offhours')};parent_modes=dict(cooling=0,warm_or_neutral=0)
     by_command={name:dict(steps=0,weighted_energy_carbon_delta=0.,meter_delta_Wh={k:0. for k in ('blower','cooling','pump','gas','heatpump')}) for name in ('identical_run_commands','changed_run_commands')}
     for a,b in zip(rows,others):
         if a['step']!=b['step'] or a['phase']!=b['phase']:raise ValueError('phase/time alignment mismatch')
@@ -34,10 +34,13 @@ def compare_pair(control,feedback):
             if y and not x:
                 extra[j]+=1
                 reason['parent']+=b['parent_run'][j];reason['hold']+=int(b['hold'][j]);reason['heat_override']+=int(b['heat_override'][j])
+                if b['hold'][j] and b['hold_origin'][j] in hold_origins:hold_origins[b['hold_origin'][j]]+=1
+                if b['parent_run'][j]:parent_modes['cooling' if b['parent_sat'][j]<0 else 'warm_or_neutral']+=1
             if x and not y:removed[j]+=1
     for bucket in by_command.values():bucket['weighted_energy_carbon_delta']/=control['result']['steps']
     return dict(ahu_ids=base['ahu_ids'],phase_comparison=phases,offhours_extra_on_handler_steps=extra,
                 offhours_removed_on_handler_steps=removed,offhours_extra_on_reason=reason,
+                offhours_extra_on_hold_origin=hold_origins,offhours_extra_on_parent_mode=parent_modes,
                 offhours_delta_by_command_state=by_command,
                 control_transitions=base['transitions'],feedback_transitions=candidate['transitions'])
 
