@@ -23,9 +23,11 @@ def register():
 
 
 class MorningAccumulator:
-    def __init__(self,time_zone):self.time_zone=time_zone;self.days={}
+    def __init__(self,time_zone,simulation_clock_naive=False):
+        self.time_zone=time_zone;self.simulation_clock_naive=simulation_clock_naive;self.days={}
     def add(self,epoch,response):
-        clock=pd.Timestamp(epoch,unit='s',tz='UTC').tz_convert(self.time_zone);day=str(clock.date())
+        clock=(pd.Timestamp(epoch,unit='s') if self.simulation_clock_naive else
+               pd.Timestamp(epoch,unit='s',tz='UTC').tz_convert(self.time_zone));day=str(clock.date())
         if day not in self.days and response.total_occupancy>0:
             self.days[day]=dict(first_occupied_epoch=epoch,first_local_clock=str(clock),steps=0,occupied_steps=0,
                 reward_sum=0.,prod_regret=0.,energy_cost=0.,carbon=0.,worst_occupied_comfort=0.)
@@ -62,7 +64,7 @@ def main():
     def initialize(cls,meta,spec):
         policy=init(cls,meta,spec)
         if hasattr(policy,'hold_report'):
-            state['policy']=policy;state['morning']=MorningAccumulator(meta['time_zone']);get_action=policy.get_action
+            state['policy']=policy;state['morning']=MorningAccumulator(meta['time_zone'],state['clock_is_naive']);get_action=policy.get_action
             policy.online_report=policy.hold_report
             def action(obs):
                 result=get_action(obs);phase=policy.decision_phase(obs)
@@ -82,7 +84,7 @@ def main():
             policy.get_action=action
         return policy
     def load_environment(*a,**kw):
-        env=load(*a,**kw);reward=env.get_reward_info_and_response
+        env=load(*a,**kw);state['clock_is_naive']=env.current_simulation_timestamp.tz is None;reward=env.get_reward_info_and_response
         def capture():
             info,response=reward()
             if state.pop('pending',False):
@@ -98,7 +100,8 @@ def main():
             sys.argv=[argv[0],'--job',str(descriptor)];base.main()
     finally:ev.initialize_policy=init;ev.load_hybrid_environment=load;base.register=old_register;sys.argv=argv
     record=json.loads(Path(core['result_path']).read_text());record['hold_diagnostics']=record.pop('online_diagnostics')
-    record.update(morning_comfort=state['morning'].days,hold_audit={k:int(v) for k,v in audit.items()})
+    record.update(morning_comfort=state['morning'].days,hold_audit={k:int(v) for k,v in audit.items()},
+                  clock_semantics=dict(simulation_timestamp_naive=state['clock_is_naive']))
     verify_record(record,job);write_json(final_path,record);print('MORNING_AND_HOLD_AUDIT_VERIFIED',flush=True)
 
 
