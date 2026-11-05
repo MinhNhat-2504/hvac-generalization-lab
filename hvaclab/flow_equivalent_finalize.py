@@ -13,7 +13,7 @@ ROOT = Path('experiments/runs/flow_equivalent_short')
 
 
 def finalize():
-    from hvaclab.flow_equivalent_review import main as review
+    from hvaclab.flow_equivalent_validation import main as review
     review()
     result = json.loads((ROOT / 'verified_review.json').read_text())
     fingerprint = digest(ROOT / 'protocol.json')

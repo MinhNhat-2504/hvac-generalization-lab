@@ -1,11 +1,15 @@
-param([string]$RunRelativePath = 'experiments\runs\delay_compensation')
+param([string]$RunRelativePath = 'experiments\runs\delay_compensation',
+      [string]$StatusFileName = 'status.json')
 $ErrorActionPreference = 'Stop'
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 $runRoot = [System.IO.Path]::GetFullPath((Join-Path $repoRoot $RunRelativePath))
 if (-not $runRoot.StartsWith($repoRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
     throw 'Run directory must be inside the repository'
 }
-$statusPath = Join-Path $runRoot 'status.json'
+if ([System.IO.Path]::GetFileName($StatusFileName) -ne $StatusFileName) {
+    throw 'StatusFileName must be a file name inside the run directory'
+}
+$statusPath = Join-Path $runRoot $StatusFileName
 $noticePath = Join-Path $runRoot 'completion_notice.json'
 $statePath = Join-Path $runRoot 'notification_watcher.json'
 
