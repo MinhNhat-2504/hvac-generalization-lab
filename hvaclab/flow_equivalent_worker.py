@@ -9,7 +9,7 @@ import numpy as np
 from hvaclab.coverage import write_json
 
 
-def main():
+def main(register_extra=None):
     from smart_buildings import evaluate as ev
     from hvaclab import offhours_hold_worker as base
     from hvaclab import morning_recovery_worker as trace
@@ -25,6 +25,7 @@ def main():
         for key,enabled in (('phase_ctrl',False),('flow_reset',True)):
             _VARIANTS[key]=('flow_equivalent',{**_VARIANTS['damper12_mid'][1],
                'offhours_hold_steps':None,'flow_equivalent':enabled,'pressure_floor_pa':200.,'damper_floor':.1,'target_opening':.98})
+        if register_extra is not None:register_extra()
 
     def initialize(cls,meta,spec):
         policy=old_init(cls,meta,spec)
