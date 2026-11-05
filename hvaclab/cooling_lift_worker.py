@@ -8,7 +8,7 @@ import sys
 from hvaclab.coverage import write_json
 
 
-def main():
+def main(register_extra=None):
     from smart_buildings import evaluate as ev
     from hvaclab import offhours_hold_worker as base
     from hvaclab import morning_recovery_worker as trace
@@ -24,6 +24,7 @@ def main():
             _VARIANTS[key]=('cooling_lift',{**_VARIANTS['damper12_mid'][1],
                 'offhours_hold_steps':None,'flow_equivalent':flow,'cooling_lift':lift,
                 'supply_reduction_k':2.,'pressure_floor_pa':200.,'damper_floor':.1,'target_opening':.98})
+        if register_extra is not None:register_extra()
     def initialize(cls,meta,spec):
         policy=old_init(cls,meta,spec)
         if isinstance(policy,CoolingLiftPolicy):
@@ -53,7 +54,7 @@ def main():
                         expected=allocation['requested_flows'][j];actual=float(box.flow_rate_demand)
                         error=abs(actual/expected-1);audit['checked_zone_steps']+=1
                         audit['max_relative_actual_flow_error']=max(audit['max_relative_actual_flow_error'],error)
-                        temperature=allocation['observed_temperature'][j]
+                        temperature=allocation.get('planning_temperature',allocation['observed_temperature'])[j]
                         before=allocation['old_flows'][j]*(temperature-allocation['old_supply'])
                         after=actual*(temperature-allocation['new_supply'])
                         audit['max_relative_estimated_cooling_error']=max(audit['max_relative_estimated_cooling_error'],abs(after/before-1))

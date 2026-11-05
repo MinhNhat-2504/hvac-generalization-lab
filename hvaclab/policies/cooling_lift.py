@@ -28,6 +28,10 @@ class CoolingLiftPolicy(FlowEquivalentPolicy):
 
     def reset(self):super().reset();self._clear_lift()
 
+    def _planning_temperatures(self,obs,ctrl,temperatures):
+        """Extension point; original allocation uses received public readings."""
+        return temperatures
+
     @staticmethod
     def native(norm,value):
         span=norm['max_normalized_value']-norm['min_normalized_value']
@@ -65,7 +69,9 @@ class CoolingLiftPolicy(FlowEquivalentPolicy):
             if desired_supply>=old_supply-.01:continue
             new_sat=np.float32(norm['min_normalized_value']+(desired_supply-norm['min_native_value'])/(norm['max_native_value']-norm['min_native_value'])*(norm['max_normalized_value']-norm['min_normalized_value']))
             new_supply=self.native(norm,float(new_sat))
-            requested_flows=old_flows*(temperatures-old_supply)/(temperatures-new_supply)
+            planning=np.asarray(self._planning_temperatures(obs,c,temperatures),dtype=float)
+            if planning.shape!=temperatures.shape or not np.all(np.isfinite(planning)) or np.any(planning<=old_supply+.5):continue
+            requested_flows=old_flows*(planning-old_supply)/(planning-new_supply)
             requested_pressure=max(self.pressure_floor_pa,float(np.max((requested_flows/max_flows/self.target_opening)**2*self.flow_design_pressure_pa)))
             if requested_pressure>old_pressure+1e-6:continue
             pn=self._pressure_norms[h]
@@ -79,7 +85,7 @@ class CoolingLiftPolicy(FlowEquivalentPolicy):
             realized=np.maximum(self.damper_floor,(new_d.astype(float)+1)/2)*max_flows*np.sqrt(new_pressure/self.flow_design_pressure_pa)
             self.last_allocations[c['ahu_id']]=dict(old_supply=old_supply,new_supply=new_supply,
                 old_flows=old_flows.tolist(),requested_flows=requested_flows.tolist(),realized_flows=realized.tolist(),
-                observed_temperature=temperatures.tolist(),public_capacity=capacity)
+                observed_temperature=temperatures.tolist(),planning_temperature=planning.tolist(),public_capacity=capacity)
             self.lift_handler_steps+=1
         return action
 
