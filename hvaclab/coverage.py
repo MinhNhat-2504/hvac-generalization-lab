@@ -20,12 +20,25 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def replace_checkpoint(temporary, target, attempts=7, initial_delay=.02):
+    """Retry transient Windows sharing locks, preserving the old checkpoint."""
+    temporary, target = Path(temporary), Path(target)
+    for attempt in range(attempts):
+        try:
+            temporary.replace(target)
+            return
+        except OSError as error:
+            if getattr(error, "winerror", None) not in (5, 32, 33) or attempt + 1 >= attempts:
+                raise
+            time.sleep(initial_delay * 2 ** attempt)
+
+
 def write_json(path, payload):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, indent=2, allow_nan=False), encoding="utf-8")
-    temporary.replace(path)
+    replace_checkpoint(temporary, path)
 
 
 def valid_result(row, task):
