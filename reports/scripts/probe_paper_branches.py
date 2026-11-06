@@ -42,6 +42,8 @@ def main():
     parser.add_argument('--warmup',type=int,default=432)
     parser.add_argument('--continuation',type=int,default=48)
     parser.add_argument('--with-interventions',action='store_true')
+    parser.add_argument('--case',choices=('building_9002/singapore_2','building_9001/atlanta_4'),
+                        default='building_9002/singapore_2')
     parser.add_argument('--output',default='experiments/runs/common_state_probe')
     parser.add_argument('--restore-numba-rng',action='store_true',
                         help='Restore compiled convection RNG too; private API, single-thread only.')
@@ -64,11 +66,12 @@ def main():
     frozen={p.as_posix():digest(p) for p in Path('hvaclab').rglob('*.py')}
     frozen.update({p.as_posix():digest(p) for p in Path('smart_buildings').rglob('*.py')})
     write_json(root/'protocol.json',dict(warmup=args.warmup,continuation=args.continuation,
-        source_sha256=frozen,probe_sha256=digest(Path(__file__)),case='building_9002/singapore_2',
+        source_sha256=frozen,probe_sha256=digest(Path(__file__)),case=args.case,
         interventions=args.with_interventions,restore_numba_rng=args.restore_numba_rng,
         numba_version=numba.__version__,scope='Reused exploratory case, common V10 warm-up, same-process copy; no causal attribution to a particular PI/hold component or independent generalization.'))
-    env=ev.load_hybrid_environment(Path('smart_buildings/holdout_scenarios/dev/building_9002/singapore_2/config.gin'))
-    meta=ev.create_building_meta_data(env,Path('smart_buildings/holdout_scenarios/dev/building_9002/singapore_2'))
+    scenario=Path('smart_buildings/holdout_scenarios/dev')/args.case
+    env=ev.load_hybrid_environment(scenario/'config.gin')
+    meta=ev.create_building_meta_data(env,scenario)
     spec=env.action_spec()
     policy=ZoneReservePolicy(meta,spec,**_VARIANTS['damper12_mid'][1],
         flow_equivalent=False,cooling_lift=False,project_lift=True,comfort_guard=False,reserve_fraction=0.)
@@ -148,7 +151,7 @@ def main():
     result=dict(status='identity_continuation_verified',warmup_v10_action_parity_steps=args.warmup,
         restore_numba_rng=args.restore_numba_rng,numba_version=numba.__version__,
         continuation_parity_steps=args.continuation,shared_native_cache='SuperLU factorization only; dynamic arrays deep-copied',
-        scope='One reused case and short horizon; not a general serialization/checkpoint guarantee.',arms={})
+        case=args.case,scope='One reused case and short horizon; not a general serialization/checkpoint guarantee.',arms={})
     if args.with_interventions:
         for name,budget in (('project',0.),('reserve20',.2)):
             e,p,o=clone();p.flow_equivalent=True;p.cooling_lift=True;p.reserve_fraction=budget
