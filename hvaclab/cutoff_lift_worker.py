@@ -40,18 +40,25 @@ def observe_action(policy,action,rows):
     return capture
 
 
+def attach_observer(policy,rows,schema):
+    from hvaclab.policies.cooling_lift import CoolingLiftPolicy
+    # The phase-control harness also constructs a raw V10 shadow. Its
+    # commands must remain independent and must not add rows to this trace.
+    if not isinstance(policy,CoolingLiftPolicy):return policy
+    schema.update(zone_ids=[v for c in policy.ahu_controllers for v,_,_ in c['zones']],
+            ahu_ids=[c['ahu_id'] for c in policy.ahu_controllers],
+            integral_limit=policy.zone_integral_limit,recovery_hours=getattr(policy,'recovery_hours',None),
+            cutoff_hour=getattr(policy,'cutoff_hour',None))
+    policy.get_action=observe_action(policy,policy.get_action,rows)
+    return policy
+
+
 def main():
     from smart_buildings import evaluate as ev
     from hvaclab.cooling_lift_worker import main as run
     initialize=ev.initialize_policy;rows=[];schema={}
     def observed(cls,meta,spec):
-        policy=initialize(cls,meta,spec)
-        schema.update(zone_ids=[v for c in policy.ahu_controllers for v,_,_ in c['zones']],
-            ahu_ids=[c['ahu_id'] for c in policy.ahu_controllers],
-            integral_limit=policy.zone_integral_limit,recovery_hours=getattr(policy,'recovery_hours',None),
-            cutoff_hour=getattr(policy,'cutoff_hour',None))
-        policy.get_action=observe_action(policy,policy.get_action,rows)
-        return policy
+        return attach_observer(initialize(cls,meta,spec),rows,schema)
     ev.initialize_policy=observed
     try:run(register_extra=register)
     finally:ev.initialize_policy=initialize

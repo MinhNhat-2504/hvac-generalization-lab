@@ -5,7 +5,7 @@ from hvaclab.pipeline_entry import register
 from hvaclab.registry import _VARIANTS
 from hvaclab.policies.cutoff_cooling_lift import CutoffCoolingLiftPolicy
 from hvaclab.policies.daytime_cooling_lift import DaytimeCoolingLiftPolicy
-from hvaclab.cutoff_lift_worker import observe_action
+from hvaclab.cutoff_lift_worker import observe_action,attach_observer
 from test_cooling_lift import meta
 import test_guarded_lift as helpers
 
@@ -57,3 +57,12 @@ class CutoffLiftTest(unittest.TestCase):
     def test_bad_cutoff_rejected(self):
         for cutoff in (13,15,float('nan')):
             with self.assertRaises(ValueError):self.make(cutoff)
+
+    def test_raw_v10_shadow_is_not_instrumented_or_counted(self):
+        from hvaclab.registry import resolve_policy
+        register();shadow=resolve_policy('damper12_mid')(meta(),None)
+        method=shadow.get_action;rows=[];schema={}
+        self.assertIs(attach_observer(shadow,rows,schema),shadow)
+        self.assertEqual(shadow.get_action,method)
+        shadow.get_action(helpers.GuardedLiftTest().obs(297.))
+        self.assertEqual(rows,[]);self.assertEqual(schema,{})
